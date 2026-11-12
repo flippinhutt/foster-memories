@@ -105,7 +105,7 @@ export function createSqliteMemoryRepository(db: SqlDatabase): MemoryRepository 
   };
 }
 
-/** Non-persistent repository: web stub until Phase 2. */
+/** Non-persistent repository, used as a test double. */
 export function createInMemoryMemoryRepository(media: MediaRepository): MemoryRepository {
   const memories = new Map<string, Memory>();
   const tagsByMemory = new Map<string, string[]>();

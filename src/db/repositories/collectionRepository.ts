@@ -70,7 +70,7 @@ export function createSqliteCollectionRepository(db: SqlDatabase): CollectionRep
   };
 }
 
-/** Non-persistent repository: web stub until Phase 2. */
+/** Non-persistent repository, used as a test double. */
 export function createInMemoryCollectionRepository(): CollectionRepository {
   const collections = new Map<string, Collection>();
   let links: CollectionLink[] = [];

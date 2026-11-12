@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { Platform } from 'react-native';
 import { AppText } from '@/src/components/AppText';
 import { Button } from '@/src/components/Button';
 import { Card } from '@/src/components/Card';
@@ -16,16 +17,9 @@ const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : 
 
 export function SettingsScreen() {
   const colors = useTheme();
-  const [persistent, setPersistent] = useState(true);
   const [progress, setProgress] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    getRepositories()
-      .then((repos) => setPersistent(repos.persistent))
-      .catch(() => setPersistent(false));
-  }, []);
 
   const run = async (task: () => Promise<string | null>) => {
     setError(null);
@@ -65,15 +59,11 @@ export function SettingsScreen() {
     <Screen>
       <Card>
         <AppText variant="heading">Your data</AppText>
-        {persistent ? (
-          <AppText muted>
-            Everything stays on this device. No account, no cloud, no tracking.
-          </AppText>
-        ) : (
-          <AppText muted accessibilityRole="alert">
-            Saving isn’t available here yet. Changes will be lost when you close this page.
-          </AppText>
-        )}
+        <AppText muted>
+          {Platform.OS === 'web'
+            ? 'Everything stays in this browser on this computer. No account, no cloud, no tracking. Clearing site data erases it, so back up now and then.'
+            : 'Everything stays on this device. No account, no cloud, no tracking.'}
+        </AppText>
       </Card>
       <Card>
         <AppText variant="heading">Backup</AppText>
@@ -89,7 +79,7 @@ export function SettingsScreen() {
           accessibilityHint="Adds pets and memories from a backup file. Nothing here is changed or removed."
         />
         <AppText variant="caption" muted>
-          Restoring only adds what isn’t here yet. Nothing on this phone is changed or removed.
+          Restoring only adds what isn’t here yet. Nothing already here is changed or removed.
         </AppText>
         {progress ? (
           <AppText muted accessibilityLiveRegion="polite">

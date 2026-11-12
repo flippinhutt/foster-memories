@@ -2,6 +2,7 @@ import { strFromU8, unzipSync } from 'fflate';
 import {
   escapeHtml,
   exportFileName,
+  photoDataUri,
   storyPhotoPaths,
   storyToHtml,
   storyToJson,
@@ -70,6 +71,12 @@ describe('exportService', () => {
     expect(Object.keys(files).sort()).toEqual(['media/media-1.jpg', 'story.json', 'story.md']);
     expect(strFromU8(files['story.md'])).toContain('# Luna');
     expect([...files['media/media-1.jpg']]).toEqual([1, 2, 3]);
+  });
+
+  it('inlines photos as data URIs, including large ones', () => {
+    expect(photoDataUri('media/a.png', new Uint8Array([104, 105]))).toBe('data:image/png;base64,aGk=');
+    const big = new Uint8Array(200_000).fill(65);
+    expect(photoDataUri('media/b.jpg', big)).toBe(`data:image/jpeg;base64,${Buffer.from(big).toString('base64')}`);
   });
 
   it('builds a safe file name', () => {

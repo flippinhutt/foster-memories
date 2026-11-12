@@ -71,9 +71,3 @@ export function createSqliteBackupRepository(db: SqlDatabase): BackupRepository 
     },
   };
 }
-
-// shortcut: web has no backup until Phase 2 storage lands.
-export function createUnavailableBackupRepository(): BackupRepository {
-  const unavailable = () => Promise.reject(new Error('Backup isn’t available on web yet.'));
-  return { dump: unavailable, restore: unavailable };
-}

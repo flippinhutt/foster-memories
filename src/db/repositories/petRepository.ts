@@ -62,7 +62,7 @@ export function createSqlitePetRepository(db: SqlDatabase): PetRepository {
   };
 }
 
-/** Non-persistent repository: web stub until Phase 2, and test double. */
+/** Non-persistent repository, used as a test double. */
 export function createMemoryPetRepository(seed: Pet[] = []): PetRepository {
   const pets = new Map(seed.map((pet) => [pet.id, pet]));
   const byOrder = (a: Pet, b: Pet) =>

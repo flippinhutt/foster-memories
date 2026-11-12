@@ -66,6 +66,15 @@ export function withoutPhotos(story: PetStory, skip: ReadonlySet<string>): PetSt
   };
 }
 
+/** Inlines a photo for the PDF, which can't load app files by path. */
+export function photoDataUri(path: string, bytes: Uint8Array): string {
+  const type = path.endsWith('.png') ? 'image/png' : path.endsWith('.webp') ? 'image/webp' : 'image/jpeg';
+  let binary = '';
+  // Chunked: spreading a whole photo into fromCharCode overflows the call stack.
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return `data:${type};base64,${btoa(binary)}`;
+}
+
 export function storyToJson(story: PetStory): string {
   const { coverPhotoPath: _cover, ...pet } = story.pet;
   return JSON.stringify(

@@ -94,7 +94,7 @@ Milestone 1 (project foundation) is done:
 - Create, list, view, and edit pets
 - Dates shown and typed as MM-DD-YYYY, with a calendar button on Android/iOS; stored as ISO `YYYY-MM-DD`
 - Pets saved in SQLite on Android (`foster-memories.db`), with versioned migrations in `src/db/migrations.ts`
-- Web keeps data in memory only until Phase 2; Settings shows a notice
+- Web uses the same SQLite database, stored in the browser (see Phase 2)
 
 Milestone 2 (pet profiles) is done:
 
@@ -134,7 +134,6 @@ Milestone 6 (export) is done:
 - Pet detail "Export story": PDF memory book, Markdown, JSON backup, or ZIP (story.md, story.json, photos)
 - Files are built in app cache (old exports cleared first), then shared with the Android share sheet
 - Progress and error messages; missing photo files are skipped
-- Export is not available on web yet
 - PDF is a scrapbook: cover polaroid, taped photos, ruled note cards, milestone stickers (system fonts only, nothing fetched)
 - PDF and ZIP: tap photos to leave them out
 
@@ -143,7 +142,16 @@ Backup and restore:
 - Settings "Back up everything": one ZIP (`backup.json` plus all photos), shared with the Android share sheet
 - Settings "Restore from backup": pick a backup ZIP; only adds pets, memories, and photos that aren't here yet, never changes or removes anything
 - Backups are checked before restore; photo paths outside `media/` are dropped
-- Not available on web yet
+
+Phase 2 (web) in progress:
+
+- Web uses the same SQLite schema and repositories as Android (expo-sqlite web, stored in the browser's private file storage)
+- Photos are copied into the browser's private file storage (`media/`) and survive reloads
+- Exports and backups download as files; the PDF opens the print dialog (choose "Save as PDF")
+- Restore picks a backup ZIP from the computer
+- Clearing site data erases everything, so Settings suggests backing up
+- Use one tab at a time; a second tab may fail to open the database
+- Not done yet: responsive/desktop layout, drag-and-drop photos, keyboard shortcuts, bulk photo selection
 
 ## Documentation
 

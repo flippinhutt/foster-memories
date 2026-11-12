@@ -35,3 +35,19 @@ export function deleteMediaFile(path: string): void {
     // Ignore; an orphaned file is harmless and private to the app.
   }
 }
+
+/** Native URIs are file paths, so there is nothing to load. Web loads its photo URLs here. */
+export async function prepareMediaUris(): Promise<void> {}
+
+/** The stored photo's bytes, or null if the file is gone. */
+export async function readMediaBytes(path: string): Promise<Uint8Array | null> {
+  const file = new File(Paths.document, path);
+  return file.exists ? file.bytes() : null;
+}
+
+/** Saves restored photo bytes; an existing file is kept as is. */
+export async function writeMediaBytes(path: string, bytes: Uint8Array): Promise<void> {
+  new Directory(Paths.document, MEDIA_DIR).create({ intermediates: true, idempotent: true });
+  const file = new File(Paths.document, path);
+  if (!file.exists) await file.write(bytes);
+}

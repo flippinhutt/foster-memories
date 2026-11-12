@@ -14,8 +14,6 @@ export interface Repositories {
   milestones: MilestoneRepository;
   collections: CollectionRepository;
   backup: BackupRepository;
-  /** False when data lives only in memory (web stub). */
-  persistent: boolean;
 }
 
 let opening: Promise<Repositories> | null = null;
@@ -30,7 +28,6 @@ async function open(): Promise<Repositories> {
     milestones: createSqliteMilestoneRepository(db),
     collections: createSqliteCollectionRepository(db),
     backup: createSqliteBackupRepository(db),
-    persistent: true,
   };
 }
 

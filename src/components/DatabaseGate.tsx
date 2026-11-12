@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { getRepositories } from '@/src/db';
+import { prepareMediaUris } from '@/src/services/mediaFiles';
 import { useCollectionStore } from '@/src/stores/collectionStore';
 import { useMemoryStore } from '@/src/stores/memoryStore';
 import { useMilestoneStore } from '@/src/stores/milestoneStore';
@@ -15,7 +16,7 @@ export function DatabaseGate({ children }: { children: ReactNode }) {
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    getRepositories()
+    Promise.all([getRepositories(), prepareMediaUris()])
       .then(() => {
         setState({ status: 'ready' });
         return Promise.all([

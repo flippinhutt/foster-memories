@@ -43,7 +43,7 @@ export function createSqliteMilestoneRepository(db: SqlDatabase): MilestoneRepos
   };
 }
 
-/** Non-persistent repository: web stub until Phase 2. */
+/** Non-persistent repository, used as a test double. */
 export function createInMemoryMilestoneRepository(): MilestoneRepository {
   const milestones = new Map<string, Milestone>();
   return {
