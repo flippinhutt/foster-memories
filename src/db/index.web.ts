@@ -1,3 +1,4 @@
+import { createInMemoryCollectionRepository } from './repositories/collectionRepository';
 import { createMemoryMediaRepository } from './repositories/mediaRepository';
 import { createInMemoryMemoryRepository } from './repositories/memoryRepository';
 import { createInMemoryMilestoneRepository } from './repositories/milestoneRepository';
@@ -13,6 +14,7 @@ const repositories: Repositories = {
   media,
   memories: createInMemoryMemoryRepository(media),
   milestones: createInMemoryMilestoneRepository(),
+  collections: createInMemoryCollectionRepository(),
   persistent: false,
 };
 

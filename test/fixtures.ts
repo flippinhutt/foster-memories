@@ -1,4 +1,5 @@
 import { emptyPetForm, type PetFormValues } from '@/src/services/petService';
+import type { Collection } from '@/src/types/collection';
 import type { Media } from '@/src/types/media';
 import type { Memory } from '@/src/types/memory';
 import type { Milestone } from '@/src/types/milestone';
@@ -69,5 +70,14 @@ export const milestoneFixture = (overrides: Partial<Milestone> = {}): Milestone 
   category: null,
   notes: null,
   createdAt: '2026-03-16T12:00:00.000Z',
+  ...overrides,
+});
+
+export const collectionFixture = (overrides: Partial<Collection> = {}): Collection => ({
+  id: 'collection-1',
+  name: 'First week',
+  description: null,
+  sortOrder: 0,
+  createdAt: '2026-03-20T12:00:00.000Z',
   ...overrides,
 });

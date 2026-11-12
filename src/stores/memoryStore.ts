@@ -9,6 +9,7 @@ import {
   type MemoryFormValues,
 } from '@/src/services/memoryService';
 import type { Memory, MemoryDetail, MemorySummary } from '@/src/types/memory';
+import { useCollectionStore } from './collectionStore';
 import { useMilestoneStore } from './milestoneStore';
 
 type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
@@ -16,6 +17,8 @@ type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
 interface MemoryState {
   /** Every memory, newest first. A personal journal stays small enough to hold in memory. */
   memories: MemorySummary[];
+  /** Tag names by memory id, for search and filters. */
+  tagsByMemory: Record<string, string[]>;
   status: LoadStatus;
   error: string | null;
   load: () => Promise<void>;
@@ -30,6 +33,7 @@ const message = (error: unknown) =>
 
 export const useMemoryStore = create<MemoryState>((set, get) => ({
   memories: [],
+  tagsByMemory: {},
   status: 'idle',
   error: null,
 
@@ -37,7 +41,10 @@ export const useMemoryStore = create<MemoryState>((set, get) => ({
     if (get().status !== 'ready') set({ status: 'loading', error: null });
     try {
       const { memories } = await getRepositories();
-      set({ memories: await memories.list(), status: 'ready' });
+      const [list, tagLinks] = await Promise.all([memories.list(), memories.listTagLinks()]);
+      const tagsByMemory: Record<string, string[]> = {};
+      for (const { memoryId, name } of tagLinks) (tagsByMemory[memoryId] ??= []).push(name);
+      set({ memories: list, tagsByMemory, status: 'ready' });
     } catch (error) {
       set({ status: 'error', error: message(error) });
     }
@@ -62,8 +69,8 @@ export const useMemoryStore = create<MemoryState>((set, get) => ({
 
   async remove(memoryId) {
     await deleteMemory(await getRepositories(), memoryId);
-    // Linked milestones lose their memoryId (ON DELETE SET NULL).
-    await Promise.all([get().load(), useMilestoneStore.getState().load()]);
+    // Linked milestones lose their memoryId (ON DELETE SET NULL); collection links are removed.
+    await Promise.all([get().load(), useMilestoneStore.getState().load(), useCollectionStore.getState().load()]);
   },
 }));
 

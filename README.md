@@ -76,6 +76,14 @@ npm run lint
 npm test
 ```
 
+## Android APK (CI)
+
+GitHub Actions (`.github/workflows/android-apk.yml`) runs the checks, then builds a release APK.
+
+- Every push to `main` and every PR: download the APK from the run's `foster-memories-apk` artifact.
+- Push a tag like `v1.0.0`: the APK is also attached to a GitHub Release.
+- The APK is signed with a debug key. It is fine for sideloading, not for the Play Store.
+
 ## Status
 
 Milestone 1 (project foundation) is done:
@@ -112,7 +120,19 @@ Milestone 4 (timeline and milestones) is done:
 - Pet detail Milestones list with delete (asks first; the linked memory is kept)
 - Deleting a memory keeps its milestones and removes the link
 
-Collections, search, and export are not built yet.
+Milestone 5 (collections and search) is done:
+
+- Collections tab: create, rename, and delete collections (deleting keeps the memories)
+- Memory detail: add or remove the memory from each collection
+- Search from Home: pets, memories (title, note, location, tags), milestones, and tags, grouped
+- Tag filter and favorites-only filter
+
+Milestone 6 (export) is done:
+
+- Pet detail "Export story": PDF memory book, Markdown, JSON backup, or ZIP (story.md, story.json, photos)
+- Files are built in app cache (old exports cleared first), then shared with the Android share sheet
+- Progress and error messages; missing photo files are skipped
+- Export is not available on web yet
 
 ## Documentation
 

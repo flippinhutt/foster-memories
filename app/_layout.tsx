@@ -24,6 +24,11 @@ export default function RootLayout() {
           <Stack.Screen name="pets/[id]/milestones/new" options={{ title: 'Add milestone' }} />
           <Stack.Screen name="memories/[id]/index" options={{ title: '' }} />
           <Stack.Screen name="memories/[id]/edit" options={{ title: 'Edit memory' }} />
+          <Stack.Screen name="pets/[id]/export" options={{ title: 'Export story' }} />
+          <Stack.Screen name="collections/new" options={{ title: 'New collection', presentation: 'modal' }} />
+          <Stack.Screen name="collections/[id]/index" options={{ title: '' }} />
+          <Stack.Screen name="collections/[id]/edit" options={{ title: 'Rename collection' }} />
+          <Stack.Screen name="search" options={{ title: 'Search' }} />
         </Stack>
       </DatabaseGate>
     </View>

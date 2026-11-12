@@ -9,6 +9,7 @@ import { MediaImage } from '@/src/components/MediaImage';
 import { Screen } from '@/src/components/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/StateViews';
 import { mediaUri } from '@/src/services/mediaFiles';
+import { useCollectionStore } from '@/src/stores/collectionStore';
 import { useMemoryDetail, useMemoryStore } from '@/src/stores/memoryStore';
 import { useMilestoneStore } from '@/src/stores/milestoneStore';
 import { selectPetById, usePetStore } from '@/src/stores/petStore';
@@ -17,7 +18,7 @@ import { formatDate } from '@/src/utils/dates';
 import { MOOD_LABELS } from '@/src/utils/memoryLabels';
 import { spacing, useTheme } from '@/src/theme';
 
-type Busy = 'favorite' | 'delete' | null;
+type Busy = 'favorite' | 'delete' | 'collection' | null;
 
 export function MemoryDetailScreen() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export function MemoryDetailScreen() {
   const pet = usePetStore(selectPetById(petId));
   const { toggleFavorite, remove } = useMemoryStore();
   const allMilestones = useMilestoneStore((s) => s.milestones);
+  const { collections, links, addMemory, removeMemory } = useCollectionStore();
   const colors = useTheme();
   const [busy, setBusy] = useState<Busy>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -48,6 +50,18 @@ export function MemoryDetailScreen() {
       await toggleFavorite(memory);
     } catch {
       setActionError('Could not update this memory. Please try again.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const toggleCollection = async (collectionId: string, inCollection: boolean) => {
+    setActionError(null);
+    setBusy('collection');
+    try {
+      await (inCollection ? removeMemory : addMemory)(collectionId, memory.id);
+    } catch {
+      setActionError('Could not update the collection. Please try again.');
     } finally {
       setBusy(null);
     }
@@ -112,6 +126,20 @@ export function MemoryDetailScreen() {
         variant="secondary"
         onPress={() => router.push({ pathname: '/memories/[id]/edit', params: { id: memory.id } })}
       />
+      {collections.map((collection) => {
+        const inCollection = links.some(
+          (link) => link.collectionId === collection.id && link.memoryId === memory.id,
+        );
+        return (
+          <Button
+            key={collection.id}
+            label={inCollection ? `Remove from ${collection.name}` : `Add to ${collection.name}`}
+            variant="secondary"
+            onPress={() => toggleCollection(collection.id, inCollection)}
+            disabled={busy !== null}
+          />
+        );
+      })}
       {actionError ? (
         <AppText accessibilityRole="alert" style={{ color: colors.danger }}>
           {actionError}

@@ -9,6 +9,7 @@ import {
 } from '@/src/services/petService';
 import type { PickedPhoto } from '@/src/services/photoPicker';
 import type { Pet } from '@/src/types/pet';
+import { useCollectionStore } from './collectionStore';
 import { useMemoryStore } from './memoryStore';
 import { useMilestoneStore } from './milestoneStore';
 
@@ -65,7 +66,12 @@ export const usePetStore = create<PetState>((set, get) => ({
 
   async remove(petId) {
     await deletePet(await getRepositories(), petId);
-    await Promise.all([get().load(), useMemoryStore.getState().load(), useMilestoneStore.getState().load()]);
+    await Promise.all([
+      get().load(),
+      useMemoryStore.getState().load(),
+      useMilestoneStore.getState().load(),
+      useCollectionStore.getState().load(),
+    ]);
   },
 }));
 

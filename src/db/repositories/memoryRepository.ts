@@ -14,6 +14,8 @@ export interface MemoryRepository {
   getTags(memoryId: string): Promise<string[]>;
   /** Replaces the memory's tags, reusing existing tags by name (case-insensitive). */
   setTags(memoryId: string, names: string[]): Promise<void>;
+  /** Every memory's tag names, for search and filters. */
+  listTagLinks(): Promise<{ memoryId: string; name: string }[]>;
 }
 
 const COLUMNS = [
@@ -94,6 +96,12 @@ export function createSqliteMemoryRepository(db: SqlDatabase): MemoryRepository 
         );
       }
     },
+
+    listTagLinks: () =>
+      db.getAllAsync<{ memoryId: string; name: string }>(
+        'SELECT mt.memoryId, t.name FROM memory_tags mt JOIN tags t ON t.id = mt.tagId ORDER BY t.name COLLATE NOCASE',
+        [],
+      ),
   };
 }
 
@@ -136,5 +144,7 @@ export function createInMemoryMemoryRepository(media: MediaRepository): MemoryRe
       });
       tagsByMemory.set(memoryId, [...new Set(resolved)]);
     },
+    listTagLinks: async () =>
+      [...tagsByMemory].flatMap(([memoryId, names]) => names.map((name) => ({ memoryId, name }))),
   };
 }

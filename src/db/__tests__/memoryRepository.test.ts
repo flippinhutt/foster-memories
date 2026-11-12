@@ -76,6 +76,13 @@ describe.each(variants)('%s memory repository', (_name, setup) => {
 
     await memories.setTags('a', ['Vet']);
     expect(await memories.getTags('a')).toEqual(['Vet']);
+    expect(await memories.listTagLinks()).toEqual(
+      expect.arrayContaining([
+        { memoryId: 'a', name: 'Vet' },
+        { memoryId: 'b', name: 'Silly' },
+      ]),
+    );
+    expect(await memories.listTagLinks()).toHaveLength(2);
   });
 
   it('deletes a memory and its tag links', async () => {

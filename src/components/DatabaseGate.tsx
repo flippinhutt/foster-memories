@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { getRepositories } from '@/src/db';
+import { useCollectionStore } from '@/src/stores/collectionStore';
 import { useMemoryStore } from '@/src/stores/memoryStore';
 import { useMilestoneStore } from '@/src/stores/milestoneStore';
 import { usePetStore } from '@/src/stores/petStore';
@@ -21,6 +22,7 @@ export function DatabaseGate({ children }: { children: ReactNode }) {
           usePetStore.getState().load(),
           useMemoryStore.getState().load(),
           useMilestoneStore.getState().load(),
+          useCollectionStore.getState().load(),
         ]);
       })
       .catch((error: unknown) =>

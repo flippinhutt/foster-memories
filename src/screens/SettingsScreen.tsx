@@ -30,7 +30,7 @@ export function SettingsScreen() {
       </Card>
       <Card>
         <AppText variant="heading">Coming soon</AppText>
-        <AppText muted>Theme, export, and backup settings.</AppText>
+        <AppText muted>Theme settings. Export a pet’s story from its page.</AppText>
       </Card>
       <AppText variant="caption" muted>
         Version {Constants.expoConfig?.version ?? 'unknown'}

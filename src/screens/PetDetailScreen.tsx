@@ -193,6 +193,11 @@ export function PetDetailScreen() {
           onPress={() => router.push({ pathname: '/pets/[id]/milestones/new', params: { id: pet.id } })}
         />
       </Card>
+      <Button
+        label="Export story"
+        variant="secondary"
+        onPress={() => router.push({ pathname: '/pets/[id]/export', params: { id: pet.id } })}
+      />
       {actionError ? (
         <AppText accessibilityRole="alert" style={{ color: colors.danger }}>
           {actionError}

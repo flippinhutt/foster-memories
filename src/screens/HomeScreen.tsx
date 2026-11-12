@@ -37,6 +37,7 @@ export function HomeScreen() {
               />
             </Card>
           ) : null}
+          <Button label="Search memories" variant="secondary" onPress={() => router.push('/search')} />
           <AppText variant="heading">In your care</AppText>
           {activePets.length === 0 ? (
             <AppText muted>No pets in your care right now.</AppText>
