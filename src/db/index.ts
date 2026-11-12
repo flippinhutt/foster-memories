@@ -1,5 +1,6 @@
 import { openDatabaseAsync } from 'expo-sqlite';
 import { migrate } from './migrations';
+import { createSqliteBackupRepository, type BackupRepository } from './repositories/backupRepository';
 import { createSqliteCollectionRepository, type CollectionRepository } from './repositories/collectionRepository';
 import { createSqliteMediaRepository, type MediaRepository } from './repositories/mediaRepository';
 import { createSqliteMemoryRepository, type MemoryRepository } from './repositories/memoryRepository';
@@ -12,6 +13,7 @@ export interface Repositories {
   memories: MemoryRepository;
   milestones: MilestoneRepository;
   collections: CollectionRepository;
+  backup: BackupRepository;
   /** False when data lives only in memory (web stub). */
   persistent: boolean;
 }
@@ -27,6 +29,7 @@ async function open(): Promise<Repositories> {
     memories: createSqliteMemoryRepository(db),
     milestones: createSqliteMilestoneRepository(db),
     collections: createSqliteCollectionRepository(db),
+    backup: createSqliteBackupRepository(db),
     persistent: true,
   };
 }

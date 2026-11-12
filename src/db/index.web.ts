@@ -1,3 +1,4 @@
+import { createUnavailableBackupRepository } from './repositories/backupRepository';
 import { createInMemoryCollectionRepository } from './repositories/collectionRepository';
 import { createMemoryMediaRepository } from './repositories/mediaRepository';
 import { createInMemoryMemoryRepository } from './repositories/memoryRepository';
@@ -15,6 +16,7 @@ const repositories: Repositories = {
   memories: createInMemoryMemoryRepository(media),
   milestones: createInMemoryMilestoneRepository(),
   collections: createInMemoryCollectionRepository(),
+  backup: createUnavailableBackupRepository(),
   persistent: false,
 };
 
