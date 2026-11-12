@@ -79,11 +79,11 @@ npm test
 
 ## Android APK (CI)
 
-GitHub Actions (`.github/workflows/android-apk.yml`) runs the checks, then builds a release APK.
+Two GitHub Actions workflows build a release APK:
 
-- Every push to `main` and every PR: download the APK from the run's `foster-memories-apk` artifact.
-- Push a tag like `v1.0.0`: the APK is also attached to a GitHub Release.
-- `versionCode` is set to the CI run number, so each new APK installs over the last one.
+- `android-apk.yml` (fast): every push to `main` and every PR. Runs the checks, then builds for arm64 only (~15 min). Download from the run's `foster-memories-apk` artifact.
+- `android-release.yml` (full): push a tag like `v1.0.0`. Builds for all ABIs and attaches the APK to a GitHub Release. Can also be run by hand.
+- `versionCode` is the CI run number; release builds add 100000, so a release APK installs over any fast build (but a fast build won't install over a release APK).
 - The APK is signed with a debug key. It is fine for sideloading, not for the Play Store.
 
 ## Status

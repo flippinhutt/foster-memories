@@ -3,19 +3,18 @@ name: Android APK
 on:
   push:
     branches: [main]
-    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -28,30 +27,25 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - run: npm ci
       # Each build gets a higher versionCode so a new APK installs over the old one.
       - run: node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('app.json'));c.expo.android.versionCode=Number(process.env.GITHUB_RUN_NUMBER);fs.writeFileSync('app.json',JSON.stringify(c,null,2))"
       - run: npx expo prebuild --platform android --no-install
+      # Fast build: arm64 only (nearly every phone since ~2017). The release workflow builds all ABIs.
       # shortcut: release APK is signed with the Expo template's debug key; add a release keystore from secrets before Play Store.
-      - run: ./gradlew assembleRelease --no-daemon
+      - run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
         working-directory: android
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: foster-memories-apk
           path: android/app/build/outputs/apk/release/app-release.apk
-      - if: startsWith(github.ref, 'refs/tags/v')
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          cp android/app/build/outputs/apk/release/app-release.apk "foster-memories-${GITHUB_REF_NAME}.apk"
-          gh release create "$GITHUB_REF_NAME" "foster-memories-${GITHUB_REF_NAME}.apk" --generate-notes
