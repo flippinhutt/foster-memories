@@ -1,6 +1,7 @@
 import { emptyPetForm, type PetFormValues } from '@/src/services/petService';
 import type { Media } from '@/src/types/media';
 import type { Memory } from '@/src/types/memory';
+import type { Milestone } from '@/src/types/milestone';
 import type { Pet } from '@/src/types/pet';
 
 export const petFixture = (overrides: Partial<Pet> = {}): Pet => ({
@@ -56,5 +57,17 @@ export const mediaFixture = (overrides: Partial<Media> = {}): Media => ({
   caption: null,
   takenAt: null,
   createdAt: '2026-03-15T12:00:00.000Z',
+  ...overrides,
+});
+
+export const milestoneFixture = (overrides: Partial<Milestone> = {}): Milestone => ({
+  id: 'milestone-1',
+  petId: 'pet-1',
+  memoryId: null,
+  label: 'First purr',
+  occurredAt: '2026-03-16',
+  category: null,
+  notes: null,
+  createdAt: '2026-03-16T12:00:00.000Z',
   ...overrides,
 });

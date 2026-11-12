@@ -104,7 +104,15 @@ Milestone 3 (memory capture) is done:
 - Pet detail shows the pet's memories newest first, with an "Add memory" button
 - Tags are reused across memories by name, ignoring case
 
-Milestones, collections, search, and export are not built yet.
+Milestone 4 (timeline and milestones) is done:
+
+- Pet detail Story shows memories and milestones together, newest first, grouped by month
+- Add milestone from a pet: pick a suggestion (first purr, first walk, adoption day…) or write your own
+- A milestone can link to one of the pet's memories; the memory detail shows its milestone
+- Pet detail Milestones list with delete (asks first; the linked memory is kept)
+- Deleting a memory keeps its milestones and removes the link
+
+Collections, search, and export are not built yet.
 
 ## Documentation
 

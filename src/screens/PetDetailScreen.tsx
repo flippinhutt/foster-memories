@@ -1,24 +1,28 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/src/components/AppText';
 import { Button } from '@/src/components/Button';
 import { Card } from '@/src/components/Card';
 import { DetailRow } from '@/src/components/DetailRow';
 import { MemoryCard } from '@/src/components/MemoryCard';
+import { MilestoneCard } from '@/src/components/MilestoneCard';
 import { PetAvatar } from '@/src/components/PetAvatar';
 import { Screen } from '@/src/components/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/StateViews';
 import { StatusBadge } from '@/src/components/StatusBadge';
 import { pickPhoto } from '@/src/services/photoPicker';
 import { useMemoryStore } from '@/src/stores/memoryStore';
+import { useMilestoneStore } from '@/src/stores/milestoneStore';
 import { selectPetById, usePetStore } from '@/src/stores/petStore';
 import { confirmDestructive } from '@/src/utils/confirm';
 import { daysInCare, formatDate } from '@/src/utils/dates';
 import { SEX_LABELS, petSummary } from '@/src/utils/petLabels';
-import { spacing, useTheme } from '@/src/theme';
+import { buildTimeline } from '@/src/utils/timeline';
+import { spacing, touchTarget, useTheme } from '@/src/theme';
 
-type Busy = 'cover' | 'delete' | null;
+type Busy = 'cover' | 'delete' | 'milestone' | null;
 
 export function PetDetailScreen() {
   const router = useRouter();
@@ -26,6 +30,7 @@ export function PetDetailScreen() {
   const pet = usePetStore(selectPetById(id));
   const { status, error, load, setCover, remove } = usePetStore();
   const memoryStore = useMemoryStore();
+  const milestoneStore = useMilestoneStore();
   const colors = useTheme();
   const [busy, setBusy] = useState<Busy>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -36,6 +41,13 @@ export function PetDetailScreen() {
 
   const days = daysInCare(pet.arrivalDate, pet.departureDate);
   const memories = memoryStore.memories.filter((memory) => memory.petId === pet.id);
+  const milestones = milestoneStore.milestones.filter((milestone) => milestone.petId === pet.id);
+  const timeline = buildTimeline(memories, milestones);
+  const memoryTitle = (memoryId: string | null) => {
+    const memory = memories.find((m) => m.id === memoryId);
+    return memory ? (memory.title ?? memory.body ?? 'Photo memory') : undefined;
+  };
+  const openMemory = (memoryId: string) => router.push({ pathname: '/memories/[id]', params: { id: memoryId } });
 
   const chooseCover = async () => {
     setActionError(null);
@@ -46,6 +58,20 @@ export function PetDetailScreen() {
       await setCover(pet, photo);
     } catch {
       setActionError('Could not save that photo. Please try another one.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const deleteMilestone = async (milestoneId: string, label: string) => {
+    setActionError(null);
+    const confirmed = await confirmDestructive(`Delete “${label}”?`, 'Its linked memory is kept.', 'Delete');
+    if (!confirmed) return;
+    setBusy('milestone');
+    try {
+      await milestoneStore.remove(milestoneId);
+    } catch {
+      setActionError('Could not delete that milestone. Please try again.');
     } finally {
       setBusy(null);
     }
@@ -105,22 +131,66 @@ export function PetDetailScreen() {
       </Card>
       <Card>
         <AppText variant="heading">Story</AppText>
-        {memoryStore.status === 'error' ? (
-          <AppText style={{ color: colors.danger }}>Could not load memories. {memoryStore.error}</AppText>
-        ) : memories.length === 0 ? (
+        {memoryStore.status === 'error' || milestoneStore.status === 'error' ? (
+          <AppText style={{ color: colors.danger }}>
+            Could not load the story. {memoryStore.error ?? milestoneStore.error}
+          </AppText>
+        ) : timeline.length === 0 ? (
           <AppText muted>No memories yet. Capture their first day, a funny moment, or a small win.</AppText>
         ) : (
-          memories.map((memory) => (
-            <MemoryCard
-              key={memory.id}
-              memory={memory}
-              onPress={() => router.push({ pathname: '/memories/[id]', params: { id: memory.id } })}
-            />
+          timeline.map((group) => (
+            <View key={group.title} style={styles.group}>
+              <AppText variant="label" muted accessibilityRole="header">
+                {group.title}
+              </AppText>
+              {group.entries.map((entry) =>
+                entry.kind === 'memory' ? (
+                  <MemoryCard key={entry.item.id} memory={entry.item} onPress={() => openMemory(entry.item.id)} />
+                ) : (
+                  <MilestoneCard
+                    key={entry.item.id}
+                    milestone={entry.item}
+                    memoryTitle={memoryTitle(entry.item.memoryId)}
+                    onPress={memoryTitle(entry.item.memoryId) ? () => openMemory(entry.item.memoryId ?? '') : undefined}
+                  />
+                ),
+              )}
+            </View>
           ))
         )}
         <Button
           label="Add memory"
           onPress={() => router.push({ pathname: '/add-memory', params: { petId: pet.id } })}
+        />
+      </Card>
+      <Card>
+        <AppText variant="heading">Milestones</AppText>
+        {milestones.length === 0 ? (
+          <AppText muted>No milestones yet. Mark firsts like a first purr or first walk.</AppText>
+        ) : (
+          milestones.map((milestone) => (
+            <MilestoneCard
+              key={milestone.id}
+              milestone={milestone}
+              memoryTitle={memoryTitle(milestone.memoryId)}
+              action={
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Delete milestone ${milestone.label}`}
+                  disabled={busy !== null}
+                  onPress={() => deleteMilestone(milestone.id, milestone.label)}
+                  style={styles.iconButton}
+                >
+                  <Ionicons name="trash-outline" size={22} color={colors.danger} />
+                </Pressable>
+              }
+            />
+          ))
+        )}
+        <Button
+          label="Add milestone"
+          variant="secondary"
+          onPress={() => router.push({ pathname: '/pets/[id]/milestones/new', params: { id: pet.id } })}
         />
       </Card>
       {actionError ? (
@@ -139,4 +209,8 @@ export function PetDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({ header: { gap: spacing.xs } });
+const styles = StyleSheet.create({
+  header: { gap: spacing.xs },
+  group: { gap: spacing.sm },
+  iconButton: { width: touchTarget, height: touchTarget, alignItems: 'center', justifyContent: 'center' },
+});

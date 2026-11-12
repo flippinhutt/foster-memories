@@ -10,6 +10,7 @@ import { Screen } from '@/src/components/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/StateViews';
 import { mediaUri } from '@/src/services/mediaFiles';
 import { useMemoryDetail, useMemoryStore } from '@/src/stores/memoryStore';
+import { useMilestoneStore } from '@/src/stores/milestoneStore';
 import { selectPetById, usePetStore } from '@/src/stores/petStore';
 import { confirmDestructive } from '@/src/utils/confirm';
 import { formatDate } from '@/src/utils/dates';
@@ -25,6 +26,7 @@ export function MemoryDetailScreen() {
   const petId = state.status === 'ready' ? state.detail.memory.petId : undefined;
   const pet = usePetStore(selectPetById(petId));
   const { toggleFavorite, remove } = useMemoryStore();
+  const allMilestones = useMilestoneStore((s) => s.milestones);
   const colors = useTheme();
   const [busy, setBusy] = useState<Busy>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -37,6 +39,7 @@ export function MemoryDetailScreen() {
 
   const { memory, photos, tags } = state.detail;
   const headline = memory.title ?? (pet ? `A memory of ${pet.name}` : 'Memory');
+  const milestones = allMilestones.filter((milestone) => milestone.memoryId === memory.id).map((m) => m.label);
 
   const favorite = async () => {
     setActionError(null);
@@ -89,11 +92,12 @@ export function MemoryDetailScreen() {
         </AppText>
       </View>
       {memory.body ? <AppText>{memory.body}</AppText> : null}
-      {memory.mood || memory.location || tags.length > 0 ? (
+      {memory.mood || memory.location || tags.length > 0 || milestones.length > 0 ? (
         <Card>
           <DetailRow label="Mood" value={memory.mood ? MOOD_LABELS[memory.mood] : null} />
           <DetailRow label="Location" value={memory.location} />
           <DetailRow label="Tags" value={tags.length > 0 ? tags.join(', ') : null} />
+          <DetailRow label="Milestone" value={milestones.length > 0 ? milestones.join(', ') : null} />
         </Card>
       ) : null}
       <Button

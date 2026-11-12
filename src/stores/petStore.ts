@@ -10,6 +10,7 @@ import {
 import type { PickedPhoto } from '@/src/services/photoPicker';
 import type { Pet } from '@/src/types/pet';
 import { useMemoryStore } from './memoryStore';
+import { useMilestoneStore } from './milestoneStore';
 
 type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -64,7 +65,7 @@ export const usePetStore = create<PetState>((set, get) => ({
 
   async remove(petId) {
     await deletePet(await getRepositories(), petId);
-    await Promise.all([get().load(), useMemoryStore.getState().load()]);
+    await Promise.all([get().load(), useMemoryStore.getState().load(), useMilestoneStore.getState().load()]);
   },
 }));
 

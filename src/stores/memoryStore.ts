@@ -9,6 +9,7 @@ import {
   type MemoryFormValues,
 } from '@/src/services/memoryService';
 import type { Memory, MemoryDetail, MemorySummary } from '@/src/types/memory';
+import { useMilestoneStore } from './milestoneStore';
 
 type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -61,7 +62,8 @@ export const useMemoryStore = create<MemoryState>((set, get) => ({
 
   async remove(memoryId) {
     await deleteMemory(await getRepositories(), memoryId);
-    await get().load();
+    // Linked milestones lose their memoryId (ON DELETE SET NULL).
+    await Promise.all([get().load(), useMilestoneStore.getState().load()]);
   },
 }));
 

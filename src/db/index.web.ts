@@ -1,5 +1,6 @@
 import { createMemoryMediaRepository } from './repositories/mediaRepository';
 import { createInMemoryMemoryRepository } from './repositories/memoryRepository';
+import { createInMemoryMilestoneRepository } from './repositories/milestoneRepository';
 import { createMemoryPetRepository } from './repositories/petRepository';
 import type { Repositories } from './index';
 
@@ -11,6 +12,7 @@ const repositories: Repositories = {
   pets: createMemoryPetRepository(),
   media,
   memories: createInMemoryMemoryRepository(media),
+  milestones: createInMemoryMilestoneRepository(),
   persistent: false,
 };
 

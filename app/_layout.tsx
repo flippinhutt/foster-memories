@@ -21,6 +21,7 @@ export default function RootLayout() {
           <Stack.Screen name="pets/new" options={{ title: 'Add pet', presentation: 'modal' }} />
           <Stack.Screen name="pets/[id]/index" options={{ title: '' }} />
           <Stack.Screen name="pets/[id]/edit" options={{ title: 'Edit pet' }} />
+          <Stack.Screen name="pets/[id]/milestones/new" options={{ title: 'Add milestone' }} />
           <Stack.Screen name="memories/[id]/index" options={{ title: '' }} />
           <Stack.Screen name="memories/[id]/edit" options={{ title: 'Edit memory' }} />
         </Stack>
