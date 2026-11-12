@@ -6,6 +6,8 @@ export interface MediaRepository {
   insert(media: Media): Promise<void>;
   delete(id: string): Promise<void>;
   listPathsByPet(petId: string): Promise<string[]>;
+  /** A memory's photos in the order they were added. */
+  listByMemory(memoryId: string): Promise<Media[]>;
 }
 
 const COLUMNS = [
@@ -45,6 +47,9 @@ export function createSqliteMediaRepository(db: SqlDatabase): MediaRepository {
       );
       return rows.flatMap((row) => (row.thumbnailUri ? [row.localUri, row.thumbnailUri] : [row.localUri]));
     },
+
+    listByMemory: (memoryId) =>
+      db.getAllAsync<Media>('SELECT * FROM media WHERE memoryId = ? ORDER BY rowid', [memoryId]),
   };
 }
 
@@ -61,5 +66,6 @@ export function createMemoryMediaRepository(): MediaRepository {
     },
     listPathsByPet: async (petId) =>
       [...media.values()].filter((item) => item.petId === petId).map((item) => item.localUri),
+    listByMemory: async (memoryId) => [...media.values()].filter((item) => item.memoryId === memoryId),
   };
 }

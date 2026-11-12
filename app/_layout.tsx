@@ -21,6 +21,8 @@ export default function RootLayout() {
           <Stack.Screen name="pets/new" options={{ title: 'Add pet', presentation: 'modal' }} />
           <Stack.Screen name="pets/[id]/index" options={{ title: '' }} />
           <Stack.Screen name="pets/[id]/edit" options={{ title: 'Edit pet' }} />
+          <Stack.Screen name="memories/[id]/index" options={{ title: '' }} />
+          <Stack.Screen name="memories/[id]/edit" options={{ title: 'Edit memory' }} />
         </Stack>
       </DatabaseGate>
     </View>

@@ -1,4 +1,4 @@
-import { launchImageLibraryAsync } from 'expo-image-picker';
+import { launchImageLibraryAsync, type ImagePickerAsset } from 'expo-image-picker';
 
 export interface PickedPhoto {
   uri: string;
@@ -6,6 +6,13 @@ export interface PickedPhoto {
   width: number;
   height: number;
 }
+
+const toPicked = (asset: ImagePickerAsset): PickedPhoto => ({
+  uri: asset.uri,
+  mimeType: asset.mimeType ?? null,
+  width: asset.width,
+  height: asset.height,
+});
 
 /**
  * Opens the system photo picker. It needs no storage permission: the user picks one
@@ -19,6 +26,17 @@ export async function pickPhoto(): Promise<PickedPhoto | null> {
     quality: 0.8,
   });
   const asset = result.canceled ? undefined : result.assets[0];
-  if (!asset) return null;
-  return { uri: asset.uri, mimeType: asset.mimeType ?? null, width: asset.width, height: asset.height };
+  return asset ? toPicked(asset) : null;
+}
+
+/** Same system picker, for several photos at once. Returns [] if the user cancels. */
+export async function pickPhotos(): Promise<PickedPhoto[]> {
+  const result = await launchImageLibraryAsync({
+    mediaTypes: ['images'],
+    allowsMultipleSelection: true,
+    selectionLimit: 20,
+    orderedSelection: true,
+    quality: 0.8,
+  });
+  return result.canceled ? [] : result.assets.map(toPicked);
 }

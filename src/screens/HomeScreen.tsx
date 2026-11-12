@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { AppText } from '@/src/components/AppText';
+import { Button } from '@/src/components/Button';
 import { Card } from '@/src/components/Card';
 import { PetCard } from '@/src/components/PetCard';
 import { Screen } from '@/src/components/Screen';
@@ -30,7 +31,10 @@ export function HomeScreen() {
           {activePets[0] ? (
             <Card>
               <AppText variant="heading">Add a memory about {activePets[0].name}</AppText>
-              <AppText muted>Memories and photos are coming in the next update.</AppText>
+              <Button
+                label="Add memory"
+                onPress={() => router.push({ pathname: '/add-memory', params: { petId: activePets[0].id } })}
+              />
             </Card>
           ) : null}
           <AppText variant="heading">In your care</AppText>

@@ -94,7 +94,17 @@ Milestone 2 (pet profiles) is done:
 - Delete pet asks for confirmation, then removes the pet, its memories, milestones, media rows, and app photo copies
 - Camera and microphone permissions are blocked in `app.json` (not used)
 
-Memories, milestones, collections, search, and export are not built yet.
+Milestone 3 (memory capture) is done:
+
+- Add Memory tab: pick a pet, add photos, date, title, note, mood, tags (comma-separated), location, favorite
+- A memory needs at least one photo or a note
+- Pick several photos at once with the system picker; each is copied into app storage
+- Memory detail screen with all photos, favorite toggle, edit, and delete with confirmation
+- Editing can add or remove photos; removed photos' app copies are deleted after the save succeeds
+- Pet detail shows the pet's memories newest first, with an "Add memory" button
+- Tags are reused across memories by name, ignoring case
+
+Milestones, collections, search, and export are not built yet.
 
 ## Documentation
 

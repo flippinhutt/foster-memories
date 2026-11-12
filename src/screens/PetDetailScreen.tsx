@@ -5,11 +5,13 @@ import { AppText } from '@/src/components/AppText';
 import { Button } from '@/src/components/Button';
 import { Card } from '@/src/components/Card';
 import { DetailRow } from '@/src/components/DetailRow';
+import { MemoryCard } from '@/src/components/MemoryCard';
 import { PetAvatar } from '@/src/components/PetAvatar';
 import { Screen } from '@/src/components/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/StateViews';
 import { StatusBadge } from '@/src/components/StatusBadge';
 import { pickPhoto } from '@/src/services/photoPicker';
+import { useMemoryStore } from '@/src/stores/memoryStore';
 import { selectPetById, usePetStore } from '@/src/stores/petStore';
 import { confirmDestructive } from '@/src/utils/confirm';
 import { daysInCare, formatDate } from '@/src/utils/dates';
@@ -23,6 +25,7 @@ export function PetDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const pet = usePetStore(selectPetById(id));
   const { status, error, load, setCover, remove } = usePetStore();
+  const memoryStore = useMemoryStore();
   const colors = useTheme();
   const [busy, setBusy] = useState<Busy>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -32,6 +35,7 @@ export function PetDetailScreen() {
   if (!pet) return <EmptyState title="Pet not found" message="This pet may have been removed." />;
 
   const days = daysInCare(pet.arrivalDate, pet.departureDate);
+  const memories = memoryStore.memories.filter((memory) => memory.petId === pet.id);
 
   const chooseCover = async () => {
     setActionError(null);
@@ -101,7 +105,23 @@ export function PetDetailScreen() {
       </Card>
       <Card>
         <AppText variant="heading">Story</AppText>
-        <AppText muted>No memories yet. Capture their first day, a funny moment, or a small win.</AppText>
+        {memoryStore.status === 'error' ? (
+          <AppText style={{ color: colors.danger }}>Could not load memories. {memoryStore.error}</AppText>
+        ) : memories.length === 0 ? (
+          <AppText muted>No memories yet. Capture their first day, a funny moment, or a small win.</AppText>
+        ) : (
+          memories.map((memory) => (
+            <MemoryCard
+              key={memory.id}
+              memory={memory}
+              onPress={() => router.push({ pathname: '/memories/[id]', params: { id: memory.id } })}
+            />
+          ))
+        )}
+        <Button
+          label="Add memory"
+          onPress={() => router.push({ pathname: '/add-memory', params: { petId: pet.id } })}
+        />
       </Card>
       {actionError ? (
         <AppText accessibilityRole="alert" style={{ color: colors.danger }}>

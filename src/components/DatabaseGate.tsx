@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { getRepositories } from '@/src/db';
+import { useMemoryStore } from '@/src/stores/memoryStore';
 import { usePetStore } from '@/src/stores/petStore';
 import { ErrorState, LoadingState } from './StateViews';
 
@@ -15,7 +16,7 @@ export function DatabaseGate({ children }: { children: ReactNode }) {
     getRepositories()
       .then(() => {
         setState({ status: 'ready' });
-        return usePetStore.getState().load();
+        return Promise.all([usePetStore.getState().load(), useMemoryStore.getState().load()]);
       })
       .catch((error: unknown) =>
         setState({
