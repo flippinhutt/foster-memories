@@ -82,6 +82,7 @@ GitHub Actions (`.github/workflows/android-apk.yml`) runs the checks, then build
 
 - Every push to `main` and every PR: download the APK from the run's `foster-memories-apk` artifact.
 - Push a tag like `v1.0.0`: the APK is also attached to a GitHub Release.
+- `versionCode` is set to the CI run number, so each new APK installs over the last one.
 - The APK is signed with a debug key. It is fine for sideloading, not for the Play Store.
 
 ## Status

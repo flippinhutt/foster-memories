@@ -39,6 +39,8 @@ jobs:
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
       - run: npm ci
+      # Each build gets a higher versionCode so a new APK installs over the old one.
+      - run: node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('app.json'));c.expo.android.versionCode=Number(process.env.GITHUB_RUN_NUMBER);fs.writeFileSync('app.json',JSON.stringify(c,null,2))"
       - run: npx expo prebuild --platform android --no-install
       # shortcut: release APK is signed with the Expo template's debug key; add a release keystore from secrets before Play Store.
       - run: ./gradlew assembleRelease --no-daemon
