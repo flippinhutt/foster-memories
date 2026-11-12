@@ -86,7 +86,15 @@ Milestone 1 (project foundation) is done:
 - Pets saved in SQLite on Android (`foster-memories.db`), with versioned migrations in `src/db/migrations.ts`
 - Web keeps data in memory only until Phase 2; Settings shows a notice
 
-Memories, photos, milestones, collections, search, and export are not built yet.
+Milestone 2 (pet profiles) is done:
+
+- Cover photo from the pet detail screen, using the system photo picker (no storage permission needed)
+- Picked photos are copied into app storage (`<documents>/media/`); the gallery original is never changed
+- Replacing a cover removes the old app copy
+- Delete pet asks for confirmation, then removes the pet, its memories, milestones, media rows, and app photo copies
+- Camera and microphone permissions are blocked in `app.json` (not used)
+
+Memories, milestones, collections, search, and export are not built yet.
 
 ## Documentation
 

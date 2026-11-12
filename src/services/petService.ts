@@ -1,8 +1,12 @@
 import { randomUUID } from 'expo-crypto';
 import { z } from 'zod';
+import type { MediaRepository } from '@/src/db/repositories/mediaRepository';
 import type { PetRepository } from '@/src/db/repositories/petRepository';
+import type { Media } from '@/src/types/media';
 import { PET_SEXES, PET_STATUSES, type Pet, type PetInput } from '@/src/types/pet';
 import { displayToIsoDate, formatDate, parseDisplayDate } from '@/src/utils/dates';
+import { deleteMediaFile, importMediaFile } from './mediaFiles';
+import type { PickedPhoto } from './photoPicker';
 
 const optionalText = z.string().trim().max(2000, 'Keep this under 2000 characters.');
 const optionalDate = z
@@ -96,6 +100,7 @@ export async function createPet(
     id: randomUUID(),
     ...toPetInput(values),
     coverPhotoId: null,
+    coverPhotoPath: null,
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -112,4 +117,59 @@ export async function updatePet(
   const pet: Pet = { ...existing, ...toPetInput(values), updatedAt: now.toISOString() };
   await repo.update(pet);
   return pet;
+}
+
+interface PetRepos {
+  pets: PetRepository;
+  media: MediaRepository;
+}
+
+/** Copies the photo into app storage, makes it the cover, then removes the old cover. */
+export async function setCoverPhoto(
+  repos: PetRepos,
+  pet: Pet,
+  photo: PickedPhoto,
+  now: Date = new Date(),
+): Promise<Pet> {
+  const timestamp = now.toISOString();
+  const id = randomUUID();
+  const localUri = await importMediaFile(photo.uri, id, photo.mimeType);
+  const media: Media = {
+    id,
+    memoryId: null,
+    petId: pet.id,
+    localUri,
+    thumbnailUri: null,
+    mimeType: photo.mimeType,
+    width: photo.width,
+    height: photo.height,
+    durationSeconds: null,
+    caption: null,
+    takenAt: null,
+    createdAt: timestamp,
+  };
+  const updated: Pet = { ...pet, coverPhotoId: id, coverPhotoPath: localUri, updatedAt: timestamp };
+  try {
+    await repos.media.insert(media);
+    await repos.pets.update(updated);
+  } catch (error) {
+    await repos.media.delete(id).catch(() => undefined);
+    deleteMediaFile(localUri);
+    throw error;
+  }
+
+  // Old cover: remove only if it is not also part of a memory.
+  const old = pet.coverPhotoId ? await repos.media.getById(pet.coverPhotoId) : null;
+  if (old && old.memoryId === null) {
+    await repos.media.delete(old.id);
+    deleteMediaFile(old.localUri);
+  }
+  return updated;
+}
+
+/** Deletes the pet with its memories, media, and milestones, then its private photo copies. */
+export async function deletePet(repos: PetRepos, petId: string): Promise<void> {
+  const paths = await repos.media.listPathsByPet(petId);
+  await repos.pets.delete(petId);
+  for (const path of paths) deleteMediaFile(path);
 }

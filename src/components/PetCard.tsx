@@ -4,6 +4,7 @@ import { formatDate } from '@/src/utils/dates';
 import { petSummary } from '@/src/utils/petLabels';
 import { radius, spacing, touchTarget, useTheme } from '@/src/theme';
 import { AppText } from './AppText';
+import { PetAvatar } from './PetAvatar';
 import { StatusBadge } from './StatusBadge';
 
 interface Props {
@@ -25,15 +26,7 @@ export function PetCard({ pet, onPress }: Props) {
         pressed && styles.pressed,
       ]}
     >
-      <View
-        style={[styles.avatar, { backgroundColor: colors.surfaceMuted }]}
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-      >
-        <AppText variant="heading" style={{ color: colors.primary }}>
-          {pet.name.charAt(0).toUpperCase()}
-        </AppText>
-      </View>
+      <PetAvatar pet={pet} size={64} />
       <View style={styles.body}>
         <AppText variant="heading" numberOfLines={1}>
           {pet.name}
@@ -64,12 +57,5 @@ const styles = StyleSheet.create({
     minHeight: touchTarget,
   },
   pressed: { opacity: 0.8 },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   body: { flex: 1, gap: spacing.xs },
 });

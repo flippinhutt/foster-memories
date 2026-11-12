@@ -5,7 +5,7 @@ import { AppText } from './AppText';
 interface Props {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'danger';
   disabled?: boolean;
   loading?: boolean;
   accessibilityHint?: string;
@@ -41,7 +41,12 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={primary ? colors.onPrimary : colors.primary} />
       ) : (
-        <AppText style={[typography.label, { color: primary ? colors.onPrimary : colors.text }]}>
+        <AppText
+          style={[
+            typography.label,
+            { color: primary ? colors.onPrimary : variant === 'danger' ? colors.danger : colors.text },
+          ]}
+        >
           {label}
         </AppText>
       )}

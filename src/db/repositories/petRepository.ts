@@ -6,6 +6,8 @@ export interface PetRepository {
   getById(id: string): Promise<Pet | null>;
   insert(pet: Pet): Promise<void>;
   update(pet: Pet): Promise<void>;
+  /** Also deletes the pet's memories, media rows, and milestones (ON DELETE CASCADE). */
+  delete(id: string): Promise<void>;
 }
 
 const COLUMNS = [
@@ -24,18 +26,20 @@ const COLUMNS = [
   'coverPhotoId',
   'createdAt',
   'updatedAt',
-] as const satisfies readonly (keyof Pet)[];
+] as const satisfies readonly Exclude<keyof Pet, 'coverPhotoPath'>[];
 
 const values = (pet: Pet) => COLUMNS.map((column) => pet[column]);
 
 // Active pets first, then most recent arrival.
-const ORDER = `ORDER BY status = 'active' DESC, COALESCE(arrivalDate, createdAt) DESC`;
+const ORDER = `ORDER BY p.status = 'active' DESC, COALESCE(p.arrivalDate, p.createdAt) DESC`;
+
+const SELECT = `SELECT p.*, m.localUri AS coverPhotoPath FROM pets p LEFT JOIN media m ON m.id = p.coverPhotoId`;
 
 export function createSqlitePetRepository(db: SqlDatabase): PetRepository {
   return {
-    list: () => db.getAllAsync<Pet>(`SELECT * FROM pets ${ORDER}`, []),
+    list: () => db.getAllAsync<Pet>(`${SELECT} ${ORDER}`, []),
 
-    getById: (id) => db.getFirstAsync<Pet>('SELECT * FROM pets WHERE id = ?', [id]),
+    getById: (id) => db.getFirstAsync<Pet>(`${SELECT} WHERE p.id = ?`, [id]),
 
     async insert(pet) {
       await db.runAsync(
@@ -50,6 +54,10 @@ export function createSqlitePetRepository(db: SqlDatabase): PetRepository {
         `UPDATE pets SET ${editable.map((column) => `${column} = ?`).join(', ')} WHERE id = ?`,
         [...editable.map((column) => pet[column]), pet.id],
       );
+    },
+
+    async delete(id) {
+      await db.runAsync('DELETE FROM pets WHERE id = ?', [id]);
     },
   };
 }
@@ -68,6 +76,9 @@ export function createMemoryPetRepository(seed: Pet[] = []): PetRepository {
     },
     update: async (pet) => {
       pets.set(pet.id, pet);
+    },
+    delete: async (id) => {
+      pets.delete(id);
     },
   };
 }

@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { getRepositories } from '@/src/db';
-import { createPet, updatePet, type PetFormValues } from '@/src/services/petService';
+import {
+  createPet,
+  deletePet,
+  setCoverPhoto,
+  updatePet,
+  type PetFormValues,
+} from '@/src/services/petService';
+import type { PickedPhoto } from '@/src/services/photoPicker';
 import type { Pet } from '@/src/types/pet';
 
 type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
@@ -12,6 +19,8 @@ interface PetState {
   load: () => Promise<void>;
   create: (values: PetFormValues) => Promise<Pet>;
   update: (existing: Pet, values: PetFormValues) => Promise<Pet>;
+  setCover: (pet: Pet, photo: PickedPhoto) => Promise<void>;
+  remove: (petId: string) => Promise<void>;
 }
 
 const message = (error: unknown) =>
@@ -45,6 +54,16 @@ export const usePetStore = create<PetState>((set, get) => ({
     const pet = await updatePet(pets, existing, values);
     await get().load();
     return pet;
+  },
+
+  async setCover(pet, photo) {
+    await setCoverPhoto(await getRepositories(), pet, photo);
+    await get().load();
+  },
+
+  async remove(petId) {
+    await deletePet(await getRepositories(), petId);
+    await get().load();
   },
 }));
 

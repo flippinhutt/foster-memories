@@ -27,9 +27,11 @@ export interface Pet {
   personality: string | null;
   notes: string | null;
   coverPhotoId: string | null;
+  /** Read-only: the cover media's localUri, joined in when pets are read. */
+  coverPhotoPath: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 /** Fields the user can edit. */
-export type PetInput = Omit<Pet, 'id' | 'coverPhotoId' | 'createdAt' | 'updatedAt'>;
+export type PetInput = Omit<Pet, 'id' | 'coverPhotoId' | 'coverPhotoPath' | 'createdAt' | 'updatedAt'>;
