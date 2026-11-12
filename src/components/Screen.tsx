@@ -11,7 +11,11 @@ interface Props {
 export function Screen({ children, scroll = true }: Props) {
   const colors = useTheme();
   if (!scroll) {
-    return <View style={[styles.fill, { backgroundColor: colors.background }]}>{children}</View>;
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <View style={styles.fill}>{children}</View>
+      </View>
+    );
   }
   return (
     <ScrollView
@@ -25,6 +29,7 @@ export function Screen({ children, scroll = true }: Props) {
 }
 
 const styles = StyleSheet.create({
-  fill: { flex: 1 },
-  content: { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl },
+  fill: { flex: 1, width: '100%', maxWidth: 720, alignSelf: 'center' },
+  // Caps line length on wide screens; no effect on phones.
+  content: { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl, width: '100%', maxWidth: 720, alignSelf: 'center' },
 });

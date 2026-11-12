@@ -151,7 +151,8 @@ Phase 2 (web) in progress:
 - Restore picks a backup ZIP from the computer
 - Clearing site data erases everything, so Settings suggests backing up
 - Use one tab at a time; a second tab may fail to open the database
-- Not done yet: responsive/desktop layout, drag-and-drop photos, keyboard shortcuts, bulk photo selection
+- Wide windows (768px+) get a sidebar instead of bottom tabs; content is capped at 720px and centered
+- Not done yet: drag-and-drop photos, keyboard shortcuts, bulk photo selection
 
 ## Documentation
 
