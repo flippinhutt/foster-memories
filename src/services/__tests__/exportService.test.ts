@@ -7,6 +7,7 @@ import {
   storyToJson,
   storyToMarkdown,
   storyZip,
+  withoutPhotos,
   type PetStory,
 } from '../exportService';
 import { mediaFixture, memoryFixture, milestoneFixture, petFixture } from '@/test/fixtures';
@@ -27,6 +28,14 @@ const story: PetStory = {
 describe('exportService', () => {
   it('lists cover and memory photos once', () => {
     expect(storyPhotoPaths(story)).toEqual(['media/cover.jpg', 'media/media-1.jpg']);
+  });
+
+  it('leaves out skipped photos, cover included', () => {
+    const trimmed = withoutPhotos(story, new Set(['media/cover.jpg', 'media/media-1.jpg']));
+    expect(trimmed.pet.coverPhotoPath).toBeNull();
+    expect(trimmed.memories[0].photos).toEqual([]);
+    expect(storyPhotoPaths(trimmed)).toEqual([]);
+    expect(withoutPhotos(story, new Set(['media/cover.jpg'])).memories[0].photos).toHaveLength(1);
   });
 
   it('writes JSON with memories, tags, photos, milestones', () => {

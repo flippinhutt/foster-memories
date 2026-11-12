@@ -22,7 +22,8 @@ The app is designed for one person to use privately on their phone.
 - Build collections such as “First Week,” “Funny Moments,” or “Farewell”
 - Compare before-and-after photos
 - Search memories, notes, tags, and pets
-- Export a pet’s story as Markdown, JSON, or a printable memory book
+- Export a pet’s story as Markdown, JSON, or a scrapbook-style memory book (PDF)
+- Back up and restore everything in one file
 - Keep all data local by default
 
 ## Non-goals
@@ -134,6 +135,15 @@ Milestone 6 (export) is done:
 - Files are built in app cache (old exports cleared first), then shared with the Android share sheet
 - Progress and error messages; missing photo files are skipped
 - Export is not available on web yet
+- PDF is a scrapbook: cover polaroid, taped photos, ruled note cards, milestone stickers (system fonts only, nothing fetched)
+- PDF and ZIP: tap photos to leave them out
+
+Backup and restore:
+
+- Settings "Back up everything": one ZIP (`backup.json` plus all photos), shared with the Android share sheet
+- Settings "Restore from backup": pick a backup ZIP; only adds pets, memories, and photos that aren't here yet, never changes or removes anything
+- Backups are checked before restore; photo paths outside `media/` are dropped
+- Not available on web yet
 
 ## Documentation
 

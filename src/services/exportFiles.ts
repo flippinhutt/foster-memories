@@ -11,6 +11,7 @@ import {
   storyToJson,
   storyToMarkdown,
   storyZip,
+  withoutPhotos,
   type ExportFormat,
 } from './exportService';
 
@@ -19,6 +20,8 @@ export async function exportPetStory(
   repos: Repositories,
   petId: string,
   format: ExportFormat,
+  /** Photo paths the user left out of a PDF or ZIP. */
+  skipPhotos: ReadonlySet<string>,
   onProgress: (message: string) => void,
 ): Promise<void> {
   if (!(await Sharing.isAvailableAsync())) throw new Error('Sharing isn’t available on this device.');
@@ -26,7 +29,8 @@ export async function exportPetStory(
   const now = new Date();
 
   onProgress('Gathering memories…');
-  const story = await loadPetStory(repos, petId, now);
+  const full = await loadPetStory(repos, petId, now);
+  const story = format === 'pdf' || format === 'zip' ? withoutPhotos(full, skipPhotos) : full;
 
   // Old exports are removed so private copies don't pile up in cache.
   const dir = new Directory(Paths.cache, 'exports');
