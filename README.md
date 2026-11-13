@@ -143,7 +143,7 @@ Backup and restore:
 - Settings "Restore from backup": pick a backup ZIP; only adds pets, memories, and photos that aren't here yet, never changes or removes anything
 - Backups are checked before restore; photo paths outside `media/` are dropped
 
-Phase 2 (web) in progress:
+Phase 2 (web companion) is done:
 
 - Web uses the same SQLite schema and repositories as Android (expo-sqlite web, stored in the browser's private file storage)
 - Photos are copied into the browser's private file storage (`media/`) and survive reloads
@@ -152,7 +152,10 @@ Phase 2 (web) in progress:
 - Clearing site data erases everything, so Settings suggests backing up
 - Use one tab at a time; a second tab may fail to open the database
 - Wide windows (768px+) get a sidebar instead of bottom tabs; content is capped at 720px and centered
-- Not done yet: drag-and-drop photos, keyboard shortcuts, bulk photo selection
+- Memory editor: drag photos from the computer onto the Photos area; files the browser can't read are skipped with a note
+- Memory editor: Ctrl+S (⌘S on Mac) or Ctrl/⌘+Enter saves
+- "Select photos" in the memory editor removes several photos at once (phones too)
+- Wide windows show bigger photo thumbnails and a two-column photo grid on memory detail
 
 ## Documentation
 

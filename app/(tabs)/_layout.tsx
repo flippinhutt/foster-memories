@@ -1,8 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
-import { useWindowDimensions } from 'react-native';
 import { Tabs } from 'expo-router/js-tabs';
-import { useTheme, type ThemeColors } from '@/src/theme';
+import { useIsWide, useTheme, type ThemeColors } from '@/src/theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -14,8 +13,7 @@ function tabIcon(name: IconName, colors: ThemeColors) {
 
 export default function TabsLayout() {
   const colors = useTheme();
-  // Wide windows (web on desktop, tablets) get a sidebar instead of bottom tabs.
-  const wide = useWindowDimensions().width >= 768;
+  const wide = useIsWide();
   return (
     <Tabs
       screenOptions={{

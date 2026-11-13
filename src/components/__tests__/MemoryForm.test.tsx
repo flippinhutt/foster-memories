@@ -45,6 +45,27 @@ describe('MemoryForm', () => {
     );
   });
 
+  it('removes several selected photos at once', async () => {
+    jest.mocked(pickPhotos).mockResolvedValueOnce(
+      [1, 2, 3].map((n) => ({ uri: `content://${n}`, mimeType: 'image/jpeg', width: 10, height: 10 })),
+    );
+    const onSubmit = jest.fn(async () => undefined);
+    await renderForm(onSubmit);
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Add photos' }));
+    await fireEvent.press(await screen.findByRole('button', { name: 'Select photos' }));
+    await fireEvent.press(screen.getByRole('checkbox', { name: 'Photo 1' }));
+    await fireEvent.press(screen.getByRole('checkbox', { name: 'Photo 3' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Remove 2 photos' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Save memory' }));
+
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ photos: [{ kind: 'new', photo: expect.objectContaining({ uri: 'content://2' }) }] }),
+      ),
+    );
+  });
+
   it('adds picked photos and lets the user remove one', async () => {
     jest.mocked(pickPhotos).mockResolvedValueOnce([
       { uri: 'content://1', mimeType: 'image/jpeg', width: 10, height: 10 },

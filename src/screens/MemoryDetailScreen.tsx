@@ -16,7 +16,7 @@ import { selectPetById, usePetStore } from '@/src/stores/petStore';
 import { confirmDestructive } from '@/src/utils/confirm';
 import { formatDate } from '@/src/utils/dates';
 import { MOOD_LABELS } from '@/src/utils/memoryLabels';
-import { spacing, useTheme } from '@/src/theme';
+import { spacing, useIsWide, useTheme } from '@/src/theme';
 
 type Busy = 'favorite' | 'delete' | 'collection' | null;
 
@@ -30,6 +30,7 @@ export function MemoryDetailScreen() {
   const allMilestones = useMilestoneStore((s) => s.milestones);
   const { collections, links, addMemory, removeMemory } = useCollectionStore();
   const colors = useTheme();
+  const wide = useIsWide();
   const [busy, setBusy] = useState<Busy>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -88,14 +89,19 @@ export function MemoryDetailScreen() {
   return (
     <Screen>
       <Stack.Screen options={{ title: formatDate(memory.occurredAt) }} />
-      {photos.map((photo, index) => (
-        <MediaImage
-          key={photo.id}
-          uri={mediaUri(photo.localUri)}
-          label={`Photo ${index + 1} of ${photos.length}`}
-          style={[styles.photo, { aspectRatio: photo.width && photo.height ? photo.width / photo.height : 1 }]}
-        />
-      ))}
+      <View style={styles.photos}>
+        {photos.map((photo, index) => (
+          <MediaImage
+            key={photo.id}
+            uri={mediaUri(photo.localUri)}
+            label={`Photo ${index + 1} of ${photos.length}`}
+            style={[
+              wide && photos.length > 1 ? styles.half : styles.photo,
+              { aspectRatio: photo.width && photo.height ? photo.width / photo.height : 1 },
+            ]}
+          />
+        ))}
+      </View>
       <View style={styles.header}>
         <AppText variant="title">
           {memory.isFavorite ? '★ ' : ''}
@@ -158,5 +164,7 @@ export function MemoryDetailScreen() {
 
 const styles = StyleSheet.create({
   header: { gap: spacing.xs },
+  photos: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   photo: { width: '100%' },
+  half: { width: '48%', flexGrow: 1 },
 });

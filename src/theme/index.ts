@@ -1,4 +1,4 @@
-import { useColorScheme } from 'react-native';
+import { useColorScheme, useWindowDimensions } from 'react-native';
 
 const light = {
   background: '#FBF7F2',
@@ -37,6 +37,11 @@ export const typography = {
   label: { fontSize: 14, fontWeight: '600' },
   caption: { fontSize: 13 },
 } as const;
+/** Wide windows (web on desktop, tablets) get a sidebar and bigger photo grids. */
+export function useIsWide(): boolean {
+  return useWindowDimensions().width >= 768;
+}
+
 /** Minimum touch target in points. */
 export const touchTarget = 44;
 
