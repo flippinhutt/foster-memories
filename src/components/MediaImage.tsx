@@ -31,8 +31,6 @@ export function MediaImage({ uri, label, style }: Props) {
   return (
     <Image
       source={{ uri }}
-      // Android: decode at view size; full-size photos exhaust bitmap memory and never draw.
-      resizeMethod="resize"
       style={[styles.box, { backgroundColor: colors.surfaceMuted }, style]}
       accessibilityIgnoresInvertColors
       accessibilityLabel={label}

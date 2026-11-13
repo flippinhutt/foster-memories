@@ -89,7 +89,7 @@ export function MemoryDetailScreen() {
   return (
     <Screen>
       <Stack.Screen options={{ title: formatDate(memory.occurredAt) }} />
-      <View style={styles.photos}>
+      <View style={wide ? styles.grid : styles.photos}>
         {photos.map((photo, index) => (
           <MediaImage
             key={photo.id}
@@ -164,7 +164,9 @@ export function MemoryDetailScreen() {
 
 const styles = StyleSheet.create({
   header: { gap: spacing.xs },
-  photos: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  // Android release: a wrapping row drops aspectRatio heights to 0, so phones stack photos in a column.
+  photos: { gap: spacing.md },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   photo: { width: '100%' },
   half: { width: '48%', flexGrow: 1 },
 });
