@@ -16,7 +16,8 @@ ios/Pods/
 ios/build/
 *.ipa
 *.apk
-*.aabexpo-env.d.ts
+*.aab
+expo-env.d.ts
 *.tsbuildinfo
 .metro-health-check*
 /ios
