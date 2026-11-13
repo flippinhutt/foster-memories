@@ -22,6 +22,8 @@ export function Screen({ children, scroll = true }: Props) {
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
+      // iOS doesn't resize the window for the keyboard; this keeps focused fields reachable.
+      automaticallyAdjustKeyboardInsets
     >
       {children}
     </ScrollView>

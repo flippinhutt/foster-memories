@@ -42,7 +42,7 @@ export function SearchScreen() {
         returnKeyType="search"
       />
       <Button
-        label={favoritesOnly ? '★ Favorites only' : 'Show favorites only'}
+        label={favoritesOnly ? 'Show all memories' : 'Show favorites only'}
         variant="secondary"
         onPress={() => setFavoritesOnly((on) => !on)}
       />

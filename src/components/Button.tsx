@@ -34,7 +34,7 @@ export function Button({
         styles.base,
         primary
           ? { backgroundColor: colors.primary }
-          : { borderColor: colors.border, borderWidth: 1, backgroundColor: colors.surface },
+          : { borderColor: colors.outline, borderWidth: 1, backgroundColor: colors.surface },
         (pressed || inactive) && styles.dim,
       ]}
     >

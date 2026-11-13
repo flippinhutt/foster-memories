@@ -83,7 +83,7 @@ export function CollectionDetailScreen() {
               accessibilityLabel={`Remove ${memory.title ?? 'memory'} from ${collection.name}`}
               disabled={busy !== null}
               onPress={() => takeOut(memory.id)}
-              style={styles.iconButton}
+              style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
             >
               <Ionicons name="remove-circle-outline" size={24} color={colors.danger} />
             </Pressable>
@@ -112,6 +112,7 @@ export function CollectionDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  pressed: { opacity: 0.6 },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   card: { flex: 1 },
   iconButton: { width: touchTarget, height: touchTarget, alignItems: 'center', justifyContent: 'center' },

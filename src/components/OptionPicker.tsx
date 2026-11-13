@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { radius, spacing, touchTarget, useTheme } from '@/src/theme';
 import { AppText } from './AppText';
@@ -25,16 +26,18 @@ export function OptionPicker<T extends string>({ label, options, value, onChange
               accessibilityLabel={option.label}
               accessibilityState={{ checked: selected }}
               onPress={() => onChange(option.value)}
-              style={[
+              style={({ pressed }) => [
                 styles.chip,
                 {
-                  borderColor: selected ? colors.primary : colors.border,
+                  borderColor: selected ? colors.primary : colors.outline,
                   backgroundColor: selected ? colors.surfaceMuted : colors.surface,
                 },
+                pressed && styles.pressed,
               ]}
             >
+              {selected ? <Ionicons name="checkmark" size={18} color={colors.primary} /> : null}
               <AppText style={selected ? { color: colors.primary, fontWeight: '600' } : undefined}>
-                {selected ? `✓ ${option.label}` : option.label}
+                {option.label}
               </AppText>
             </Pressable>
           );
@@ -45,6 +48,7 @@ export function OptionPicker<T extends string>({ label, options, value, onChange
 }
 
 const styles = StyleSheet.create({
+  pressed: { opacity: 0.6 },
   wrap: { gap: spacing.xs },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: {
@@ -52,6 +56,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderWidth: 1,
     borderRadius: radius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
     justifyContent: 'center',
   },
 });

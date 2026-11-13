@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { mediaUri } from '@/src/services/mediaFiles';
 import type { MemorySummary } from '@/src/types/memory';
@@ -39,10 +40,12 @@ export function MemoryCard({ memory, onPress }: Props) {
         <MediaImage uri={mediaUri(memory.photoPath)} label="" style={styles.photo} />
       ) : null}
       <View style={styles.body}>
-        <AppText variant="label" numberOfLines={2}>
-          {memory.isFavorite ? '★ ' : ''}
-          {headline}
-        </AppText>
+        <View style={styles.headline}>
+          {memory.isFavorite ? <Ionicons name="star" size={16} color={colors.primary} /> : null}
+          <AppText variant="label" numberOfLines={2} style={styles.shrink}>
+            {headline}
+          </AppText>
+        </View>
         <AppText variant="caption" muted>
           {meta}
         </AppText>
@@ -64,4 +67,6 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.8 },
   photo: { width: 64, height: 64 },
   body: { flex: 1, gap: spacing.xs },
+  headline: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  shrink: { flexShrink: 1 },
 });

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -103,10 +104,14 @@ export function MemoryDetailScreen() {
         ))}
       </View>
       <View style={styles.header}>
-        <AppText variant="title">
-          {memory.isFavorite ? '★ ' : ''}
-          {headline}
-        </AppText>
+        <View style={styles.headline}>
+          {memory.isFavorite ? (
+            <Ionicons name="star" size={24} color={colors.primary} accessibilityLabel="Favorite" />
+          ) : null}
+          <AppText variant="title" style={styles.shrink}>
+            {headline}
+          </AppText>
+        </View>
         <AppText muted>
           {[pet?.name, formatDate(memory.occurredAt)].filter(Boolean).join(' · ')}
         </AppText>
@@ -164,6 +169,8 @@ export function MemoryDetailScreen() {
 
 const styles = StyleSheet.create({
   header: { gap: spacing.xs },
+  headline: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  shrink: { flexShrink: 1 },
   // Android release: a wrapping row drops aspectRatio heights to 0, so phones stack photos in a column.
   photos: { gap: spacing.md },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },

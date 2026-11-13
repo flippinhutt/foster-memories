@@ -116,7 +116,11 @@ function PhotoField({ value, onChange }: { value: DraftPhoto[]; onChange: (photo
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked }}
                   accessibilityLabel={`Photo ${index + 1}`}
-                  style={[styles.pick, { borderColor: checked ? colors.danger : 'transparent' }]}
+                  style={({ pressed }) => [
+                    styles.pick,
+                    { borderColor: checked ? colors.danger : 'transparent' },
+                    pressed && styles.pressed,
+                  ]}
                 >
                   {image}
                   {checked ? (
@@ -135,7 +139,11 @@ function PhotoField({ value, onChange }: { value: DraftPhoto[]; onChange: (photo
                   accessibilityLabel={`Remove photo ${index + 1}`}
                   onPress={() => onChange(value.filter((_, i) => i !== index))}
                   hitSlop={(touchTarget - 32) / 2}
-                  style={[styles.remove, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                  style={({ pressed }) => [
+                    styles.remove,
+                    { backgroundColor: colors.surface, borderColor: colors.outline },
+                    pressed && styles.pressed,
+                  ]}
                 >
                   <Ionicons name="close" size={20} color={colors.text} />
                 </Pressable>
@@ -298,6 +306,7 @@ export function MemoryForm({ pets, initialValues, submitLabel, onSubmit }: Props
 }
 
 const styles = StyleSheet.create({
+  pressed: { opacity: 0.6 },
   field: { gap: spacing.xs },
   dropping: { borderWidth: 2, borderStyle: 'dashed', borderRadius: radius.md, padding: spacing.sm, margin: -spacing.sm - 2 },
   photos: { gap: spacing.sm },

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -82,13 +83,16 @@ export function ExportScreen() {
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: included }}
                   accessibilityLabel={`Photo ${i + 1}`}
-                  style={[styles.tile, wide && styles.tileWide, { borderColor: included ? colors.primary : colors.border }]}
+                  style={({ pressed }) => [
+                    styles.tile,
+                    wide && styles.tileWide,
+                    { borderColor: included ? colors.primary : colors.outline },
+                    pressed && styles.pressed,
+                  ]}
                 >
                   <MediaImage uri={mediaUri(path)} label={`Photo ${i + 1}`} style={[styles.thumb, !included && styles.off]} />
                   <View style={[styles.check, { backgroundColor: included ? colors.primary : colors.surfaceMuted }]}>
-                    <AppText variant="caption" style={{ color: included ? colors.onPrimary : colors.textMuted }}>
-                      {included ? '✓' : ''}
-                    </AppText>
+                    {included ? <Ionicons name="checkmark" size={16} color={colors.onPrimary} /> : null}
                   </View>
                 </Pressable>
               );
@@ -112,6 +116,7 @@ export function ExportScreen() {
 }
 
 const styles = StyleSheet.create({
+  pressed: { opacity: 0.6 },
   photos: { gap: spacing.xs },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   tile: { width: 96, height: 96, borderWidth: 3, borderRadius: radius.md, overflow: 'hidden' },

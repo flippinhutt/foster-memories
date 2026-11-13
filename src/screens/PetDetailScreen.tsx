@@ -179,7 +179,7 @@ export function PetDetailScreen() {
                   accessibilityLabel={`Delete milestone ${milestone.label}`}
                   disabled={busy !== null}
                   onPress={() => deleteMilestone(milestone.id, milestone.label)}
-                  style={styles.iconButton}
+                  style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
                 >
                   <Ionicons name="trash-outline" size={22} color={colors.danger} />
                 </Pressable>
@@ -215,6 +215,7 @@ export function PetDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  pressed: { opacity: 0.6 },
   header: { gap: spacing.xs },
   group: { gap: spacing.sm },
   iconButton: { width: touchTarget, height: touchTarget, alignItems: 'center', justifyContent: 'center' },

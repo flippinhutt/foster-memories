@@ -39,8 +39,12 @@ export function DateField({ label, value, onChange, onBlur, error }: Props) {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`Choose ${label.toLowerCase()} from calendar`}
-              onPress={() => setOpen(true)}
-              style={[styles.button, { borderColor: colors.border, backgroundColor: colors.surface }]}
+              onPress={() => setOpen((o) => !o)}
+              style={({ pressed }) => [
+                styles.button,
+                { borderColor: colors.outline, backgroundColor: colors.surface },
+                pressed && styles.pressed,
+              ]}
             >
               <Ionicons name="calendar-outline" size={22} color={colors.primary} />
             </Pressable>
@@ -50,6 +54,8 @@ export function DateField({ label, value, onChange, onBlur, error }: Props) {
       {open ? (
         <DateTimePicker
           mode="date"
+          // iOS default is a compact button that needs a second tap; inline shows the calendar now.
+          display={Platform.OS === 'ios' ? 'inline' : 'default'}
           value={parseDisplayDate(value) ?? new Date()}
           onChange={(event, date) => {
             setOpen(false);
@@ -62,6 +68,7 @@ export function DateField({ label, value, onChange, onBlur, error }: Props) {
 }
 
 const styles = StyleSheet.create({
+  pressed: { opacity: 0.6 },
   button: {
     width: touchTarget,
     height: touchTarget,

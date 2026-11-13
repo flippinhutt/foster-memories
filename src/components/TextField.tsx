@@ -28,7 +28,7 @@ export function TextField({ label, error, hint, accessory, multiline, ...rest }:
             {
               color: colors.text,
               backgroundColor: colors.surface,
-              borderColor: error ? colors.danger : colors.border,
+              borderColor: error ? colors.danger : colors.outline,
             },
             multiline && styles.multiline,
           ]}

@@ -1,4 +1,4 @@
-import { useColorScheme, useWindowDimensions } from 'react-native';
+import { Platform, useColorScheme, useWindowDimensions } from 'react-native';
 
 const light = {
   background: '#FBF7F2',
@@ -9,6 +9,8 @@ const light = {
   primary: '#A4532F',
   onPrimary: '#FFFFFF',
   border: '#E3D7CA',
+  /** Edges of inputs and tappable controls; at least 3:1 against background and surfaces. */
+  outline: '#93816F',
   danger: '#B3261E',
   success: '#2F6B3F',
 };
@@ -22,6 +24,7 @@ const dark: typeof light = {
   primary: '#E39A72',
   onPrimary: '#2A140A',
   border: '#463C35',
+  outline: '#857568',
   danger: '#F2B8B5',
   success: '#9FD3A9',
 };
@@ -42,8 +45,8 @@ export function useIsWide(): boolean {
   return useWindowDimensions().width >= 768;
 }
 
-/** Minimum touch target in points. */
-export const touchTarget = 44;
+/** Minimum touch target: 48dp on Android, 44pt on iOS and web. */
+export const touchTarget = Platform.OS === 'android' ? 48 : 44;
 
 export function useTheme(): ThemeColors {
   return useColorScheme() === 'dark' ? dark : light;
