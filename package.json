@@ -55,6 +55,7 @@
     "typescript": "~6.0.3"
   },
   "private": true,
+  "license": "MIT",
   "jest": {
     "preset": "jest-expo",
     "moduleNameMapper": {
