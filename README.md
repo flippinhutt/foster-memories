@@ -33,7 +33,7 @@ No account. No cloud. No ads or tracking. Your data stays on your device.
 | --- | --- |
 | Android | Main target. Fully working. |
 | Web | Working. Same app, stored in the browser. Sidebar layout on wide screens. |
-| iOS | Configured, not yet tested on a device. |
+| iOS | Configured, not tested. On hold: App Store release needs a paid Apple Developer account. |
 
 Web notes:
 

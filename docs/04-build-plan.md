@@ -147,7 +147,10 @@ Acceptance criteria:
 - Mobile and web use the same domain models and business logic.
 - No separate web-only data model is created.
 
-## Phase 3: iOS compatibility
+## Phase 3: iOS compatibility (on hold)
+
+On hold: release needs a paid Apple Developer account ($99/yr). Config is in
+`app.json`; device testing and TestFlight are not done.
 
 Add iOS as a supported platform.
 
