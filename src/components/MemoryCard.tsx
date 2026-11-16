@@ -30,6 +30,7 @@ export function MemoryCard({ memory, onPress }: Props) {
       accessibilityRole="button"
       accessibilityLabel={`${memory.isFavorite ? 'Favorite. ' : ''}${headline}, ${meta}`}
       onPress={onPress}
+      android_ripple={{ color: colors.border, foreground: true }}
       style={({ pressed }) => [
         styles.card,
         { backgroundColor: colors.surface, borderColor: colors.border },
@@ -56,6 +57,7 @@ export function MemoryCard({ memory, onPress }: Props) {
 
 const styles = StyleSheet.create({
   card: {
+    overflow: 'hidden',
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,

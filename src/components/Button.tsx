@@ -30,6 +30,7 @@ export function Button({
       accessibilityState={{ disabled: inactive, busy: loading }}
       disabled={inactive}
       onPress={onPress}
+      android_ripple={{ color: colors.border, foreground: true }}
       style={({ pressed }) => [
         styles.base,
         primary
@@ -56,6 +57,7 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
+    overflow: 'hidden',
     minHeight: touchTarget,
     paddingHorizontal: spacing.lg,
     borderRadius: radius.pill,

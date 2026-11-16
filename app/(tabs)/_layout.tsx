@@ -5,9 +5,9 @@ import { useIsWide, useTheme, type ThemeColors } from '@/src/theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
-function tabIcon(name: IconName, colors: ThemeColors) {
+function tabIcon(name: IconName, outline: IconName, colors: ThemeColors) {
   return function TabIcon({ focused, size }: { focused: boolean; size: number }) {
-    return <Ionicons name={name} color={focused ? colors.primary : colors.textMuted} size={size} />;
+    return <Ionicons name={focused ? name : outline} color={focused ? colors.primary : colors.textMuted} size={size} />;
   };
 }
 
@@ -27,14 +27,14 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: tabIcon('home-outline', colors) }} />
-      <Tabs.Screen name="pets" options={{ title: 'Pets', tabBarIcon: tabIcon('paw-outline', colors) }} />
+      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: tabIcon('home', 'home-outline', colors) }} />
+      <Tabs.Screen name="pets" options={{ title: 'Pets', tabBarIcon: tabIcon('paw', 'paw-outline', colors) }} />
       <Tabs.Screen
         name="add-memory"
-        options={{ title: 'Add Memory', tabBarIcon: tabIcon('add-circle', colors), tabBarAccessibilityLabel: 'Add memory' }}
+        options={{ title: 'Add Memory', tabBarIcon: tabIcon('add-circle', 'add-circle-outline', colors), tabBarAccessibilityLabel: 'Add memory' }}
       />
-      <Tabs.Screen name="collections" options={{ title: 'Collections', tabBarIcon: tabIcon('albums-outline', colors) }} />
-      <Tabs.Screen name="settings" options={{ title: 'Settings', tabBarIcon: tabIcon('settings-outline', colors) }} />
+      <Tabs.Screen name="collections" options={{ title: 'Collections', tabBarIcon: tabIcon('albums', 'albums-outline', colors) }} />
+      <Tabs.Screen name="settings" options={{ title: 'Settings', tabBarIcon: tabIcon('settings', 'settings-outline', colors) }} />
     </Tabs>
   );
 }

@@ -20,6 +20,7 @@ export function PetCard({ pet, onPress }: Props) {
       accessibilityRole="button"
       accessibilityLabel={`Open ${pet.name}`}
       onPress={onPress}
+      android_ripple={{ color: colors.border, foreground: true }}
       style={({ pressed }) => [
         styles.card,
         { backgroundColor: colors.surface, borderColor: colors.border },
@@ -49,6 +50,7 @@ export function PetCard({ pet, onPress }: Props) {
 
 const styles = StyleSheet.create({
   card: {
+    overflow: 'hidden',
     flexDirection: 'row',
     gap: spacing.md,
     padding: spacing.md,

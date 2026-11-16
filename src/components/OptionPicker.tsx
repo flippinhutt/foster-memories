@@ -26,6 +26,7 @@ export function OptionPicker<T extends string>({ label, options, value, onChange
               accessibilityLabel={option.label}
               accessibilityState={{ checked: selected }}
               onPress={() => onChange(option.value)}
+              android_ripple={{ color: colors.border, foreground: true }}
               style={({ pressed }) => [
                 styles.chip,
                 {
@@ -52,6 +53,7 @@ const styles = StyleSheet.create({
   wrap: { gap: spacing.xs },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: {
+    overflow: 'hidden',
     minHeight: touchTarget,
     paddingHorizontal: spacing.md,
     borderWidth: 1,
