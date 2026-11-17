@@ -7,24 +7,29 @@ import { AppText } from '@/src/components/AppText';
 import { Button } from '@/src/components/Button';
 import { Card } from '@/src/components/Card';
 import { DetailRow } from '@/src/components/DetailRow';
+import { MediaImage } from '@/src/components/MediaImage';
+import { MediaVideo } from '@/src/components/MediaVideo';
 import { MemoryCard } from '@/src/components/MemoryCard';
 import { MilestoneCard } from '@/src/components/MilestoneCard';
 import { PetAvatar } from '@/src/components/PetAvatar';
 import { Screen } from '@/src/components/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/StateViews';
 import { StatusBadge } from '@/src/components/StatusBadge';
+import { mediaUri } from '@/src/services/mediaFiles';
 import { FAREWELL_TAG } from '@/src/services/memoryService';
-import { pickPhoto } from '@/src/services/photoPicker';
+import { pickPhoto, pickPhotos } from '@/src/services/photoPicker';
 import { useMemoryStore } from '@/src/stores/memoryStore';
 import { useMilestoneStore } from '@/src/stores/milestoneStore';
-import { selectPetById, usePetStore } from '@/src/stores/petStore';
+import { selectPetById, usePetPhotos, usePetStore } from '@/src/stores/petStore';
+import type { Media } from '@/src/types/media';
 import { confirmDestructive } from '@/src/utils/confirm';
 import { daysInCare, formatDate } from '@/src/utils/dates';
+import { isVideo } from '@/src/utils/media';
 import { SEX_LABELS, petSummary } from '@/src/utils/petLabels';
 import { buildTimeline } from '@/src/utils/timeline';
 import { radius, spacing, touchTarget, useTheme } from '@/src/theme';
 
-type Busy = 'cover' | 'delete' | 'milestone' | null;
+type Busy = 'cover' | 'delete' | 'milestone' | 'photos' | null;
 
 export function PetDetailScreen() {
   const router = useRouter();
@@ -33,6 +38,7 @@ export function PetDetailScreen() {
   const { status, error, load, setCover, remove } = usePetStore();
   const memoryStore = useMemoryStore();
   const milestoneStore = useMilestoneStore();
+  const petPhotos = usePetPhotos(pet);
   const colors = useTheme();
   const [busy, setBusy] = useState<Busy>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -79,6 +85,39 @@ export function PetDetailScreen() {
       await milestoneStore.remove(milestoneId);
     } catch {
       setActionError('Could not delete that milestone. Please try again.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const addPhotos = async () => {
+    setActionError(null);
+    try {
+      const picked = await pickPhotos();
+      if (picked.length === 0) return;
+      setBusy('photos');
+      await petPhotos.add(picked);
+    } catch {
+      setActionError('Could not save those photos. Please try again.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const deletePhoto = async (media: Media) => {
+    setActionError(null);
+    const kind = isVideo(media.localUri, media.mimeType) ? 'video' : 'photo';
+    const confirmed = await confirmDestructive(
+      `Delete this ${kind}?`,
+      'This removes the copy saved in this app. Your gallery is not touched.',
+      'Delete',
+    );
+    if (!confirmed) return;
+    setBusy('photos');
+    try {
+      await petPhotos.remove(media);
+    } catch {
+      setActionError(`Could not delete that ${kind}. Please try again.`);
     } finally {
       setBusy(null);
     }
@@ -218,6 +257,47 @@ export function PetDetailScreen() {
             onPress={() => router.push({ pathname: '/pets/[id]/milestones/new', params: { id: pet.id } })}
           />
         </Card>
+        <Card>
+          <AppText variant="heading">Photos & videos</AppText>
+          {petPhotos.state.status === 'loading' ? (
+            <ActivityIndicator color={colors.primary} />
+          ) : petPhotos.state.status === 'error' ? (
+            <AppText style={{ color: colors.danger }}>Could not load photos. {petPhotos.state.message}</AppText>
+          ) : petPhotos.state.photos.length === 0 ? (
+            <AppText muted>Add photos or clips of {pet.name} without writing a memory.</AppText>
+          ) : (
+            petPhotos.state.photos.map((media, index, all) => {
+              const video = isVideo(media.localUri, media.mimeType);
+              const label = `${video ? 'Video' : 'Photo'} ${index + 1} of ${all.length}`;
+              const style = [styles.photo, { aspectRatio: media.width && media.height ? media.width / media.height : 1 }];
+              return (
+                <View key={media.id} style={styles.photoItem}>
+                  {video ? (
+                    <MediaVideo uri={mediaUri(media.localUri)} label={label} style={style} />
+                  ) : (
+                    <MediaImage uri={mediaUri(media.localUri)} label={label} style={style} />
+                  )}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Delete ${label.toLowerCase()}`}
+                    disabled={busy !== null}
+                    onPress={() => deletePhoto(media)}
+                    style={({ pressed }) => [styles.iconButton, styles.photoDelete, pressed && styles.pressed]}
+                  >
+                    <Ionicons name="trash-outline" size={22} color={colors.danger} />
+                  </Pressable>
+                </View>
+              );
+            })
+          )}
+          <Button
+            label="Add photos & videos"
+            variant="secondary"
+            onPress={addPhotos}
+            loading={busy === 'photos'}
+            disabled={busy !== null}
+          />
+        </Card>
         {hasDetails ? (
           <Card>
             <Pressable
@@ -270,6 +350,10 @@ const styles = StyleSheet.create({
   header: { gap: spacing.xs },
   headerActions: { flexDirection: 'row' },
   group: { gap: spacing.sm },
+  // Column, not a wrapping row: Android release drops aspectRatio heights to 0 in wrapped rows.
+  photoItem: { gap: spacing.xs },
+  photo: { width: '100%' },
+  photoDelete: { alignSelf: 'flex-end' },
   iconButton: { width: touchTarget, height: touchTarget, alignItems: 'center', justifyContent: 'center' },
   aboutToggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: touchTarget },
   fab: {

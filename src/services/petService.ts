@@ -6,6 +6,7 @@ import type { Media } from '@/src/types/media';
 import { PET_SEXES, PET_STATUSES, type Pet, type PetInput } from '@/src/types/pet';
 import { displayToIsoDate, formatDate, parseDisplayDate } from '@/src/utils/dates';
 import { deleteMediaFile, importMediaFile } from './mediaFiles';
+import { addPhotos } from './memoryService';
 import type { PickedPhoto } from './photoPicker';
 
 const optionalText = z.string().trim().max(2000, 'Keep this under 2000 characters.');
@@ -165,6 +166,20 @@ export async function setCoverPhoto(
     deleteMediaFile(old.localUri);
   }
   return updated;
+}
+
+/** Photos and clips added straight to the pet, not to a memory. The cover is left out. */
+export async function listPetPhotos(repos: PetRepos, pet: Pet): Promise<Media[]> {
+  return (await repos.media.listLooseByPet(pet.id)).filter((media) => media.id !== pet.coverPhotoId);
+}
+
+export async function addPetPhotos(repos: PetRepos, pet: Pet, photos: PickedPhoto[], now: Date = new Date()) {
+  await addPhotos(repos, { petId: pet.id, memoryId: null }, photos, now.toISOString());
+}
+
+export async function deletePetPhoto(repos: PetRepos, media: Media): Promise<void> {
+  await repos.media.delete(media.id);
+  deleteMediaFile(media.localUri);
 }
 
 /** Deletes the pet with its memories, media, and milestones, then its private photo copies. */

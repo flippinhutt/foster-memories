@@ -12,6 +12,7 @@ No account. No cloud. No ads or tracking. Your data stays on your device.
 
 - **Pet profiles** with cover photo, arrival and departure dates, and status
 - **Memories** with photos (gallery or camera), short video clips, a note, mood, tags, location, and favorites
+- **Photos & videos** on each pet's page, added straight from the gallery without writing a memory
 - **On this day** on Home: memories and farewells from this date in past years
 - **Farewell prompts** once a pet leaves your care
 - **Story timeline** that mixes memories and milestones, grouped by month

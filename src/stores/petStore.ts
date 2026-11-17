@@ -1,13 +1,18 @@
+import { useEffect, useState } from 'react';
 import { create } from 'zustand';
 import { getRepositories } from '@/src/db';
 import {
+  addPetPhotos,
   createPet,
   deletePet,
+  deletePetPhoto,
+  listPetPhotos,
   setCoverPhoto,
   updatePet,
   type PetFormValues,
 } from '@/src/services/petService';
 import type { PickedPhoto } from '@/src/services/photoPicker';
+import type { Media } from '@/src/types/media';
 import type { Pet } from '@/src/types/pet';
 import { useCollectionStore } from './collectionStore';
 import { useMemoryStore } from './memoryStore';
@@ -77,3 +82,42 @@ export const usePetStore = create<PetState>((set, get) => ({
 
 export const selectPetById = (id: string | undefined) => (state: PetState) =>
   state.pets.find((pet) => pet.id === id);
+
+type PhotosState = { status: 'loading' } | { status: 'ready'; photos: Media[] } | { status: 'error'; message: string };
+
+/** A pet's photos and clips outside any memory; reloads when the pet changes. */
+export function usePetPhotos(pet: Pet | undefined) {
+  const [state, setState] = useState<PhotosState>({ status: 'loading' });
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    if (!pet) return;
+    let active = true;
+    getRepositories()
+      .then((repos) => listPetPhotos(repos, pet))
+      .then((photos) => {
+        if (active) setState({ status: 'ready', photos });
+      })
+      .catch((error: unknown) => {
+        if (active) setState({ status: 'error', message: message(error) });
+      });
+    return () => {
+      active = false;
+    };
+  }, [pet, attempt]);
+
+  const reload = () => setAttempt((n) => n + 1);
+  return {
+    state,
+    reload,
+    async add(photos: PickedPhoto[]) {
+      if (!pet) return;
+      await addPetPhotos(await getRepositories(), pet, photos);
+      reload();
+    },
+    async remove(media: Media) {
+      await deletePetPhoto(await getRepositories(), media);
+      reload();
+    },
+  };
+}

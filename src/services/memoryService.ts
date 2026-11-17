@@ -103,8 +103,13 @@ interface MemoryRepos {
 const newPhotos = (photos: DraftPhoto[]) =>
   photos.flatMap((draft) => (draft.kind === 'new' ? [draft.photo] : []));
 
-/** Copies picked photos into app storage and links them to the memory. All or nothing. */
-async function addPhotos(repos: MemoryRepos, memory: Memory, photos: PickedPhoto[], timestamp: string) {
+/** Copies picked photos into app storage and links them to the pet and memory, if any. All or nothing. */
+export async function addPhotos(
+  repos: { media: MediaRepository },
+  owner: Pick<Media, 'petId' | 'memoryId'>,
+  photos: PickedPhoto[],
+  timestamp: string,
+) {
   const added: Media[] = [];
   try {
     for (const photo of photos) {
@@ -112,8 +117,7 @@ async function addPhotos(repos: MemoryRepos, memory: Memory, photos: PickedPhoto
       const localUri = await importMediaFile(photo.uri, id, photo.mimeType);
       const media: Media = {
         id,
-        memoryId: memory.id,
-        petId: memory.petId,
+        ...owner,
         localUri,
         thumbnailUri: null,
         mimeType: photo.mimeType,
@@ -146,7 +150,7 @@ export async function createMemory(
   const memory: Memory = { id: randomUUID(), ...fields, createdAt: timestamp, updatedAt: timestamp };
   await repos.memories.insert(memory);
   try {
-    await addPhotos(repos, memory, newPhotos(parsed.photos), timestamp);
+    await addPhotos(repos, { petId: memory.petId, memoryId: memory.id }, newPhotos(parsed.photos), timestamp);
     await repos.memories.setTags(memory.id, parseTags(parsed.tags));
   } catch (error) {
     await deleteMemory(repos, memory.id).catch(() => undefined);
@@ -169,7 +173,7 @@ export async function updateMemory(
 
   await repos.memories.update(memory);
   await repos.memories.setTags(memory.id, parseTags(parsed.tags));
-  await addPhotos(repos, memory, newPhotos(parsed.photos), timestamp);
+  await addPhotos(repos, { petId: memory.petId, memoryId: memory.id }, newPhotos(parsed.photos), timestamp);
 
   const kept = new Set(parsed.photos.flatMap((draft) => (draft.kind === 'saved' ? [draft.media.id] : [])));
   for (const media of before) {

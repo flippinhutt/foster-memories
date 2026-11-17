@@ -5,7 +5,7 @@ import { migrate } from '@/src/db/migrations';
 import { createSqliteMediaRepository } from '@/src/db/repositories/mediaRepository';
 import { createSqlitePetRepository } from '@/src/db/repositories/petRepository';
 import { deleteMediaFile, importMediaFile } from '../mediaFiles';
-import { deletePet, setCoverPhoto } from '../petService';
+import { addPetPhotos, deletePet, deletePetPhoto, listPetPhotos, setCoverPhoto } from '../petService';
 import type { PickedPhoto } from '../photoPicker';
 
 jest.mock('../mediaFiles', () => ({
@@ -92,5 +92,64 @@ describe('deletePet', () => {
     expect(deleteMediaFile).toHaveBeenCalledTimes(1);
     expect(deleteMediaFile).toHaveBeenCalledWith(withCover.coverPhotoPath);
     expect((await repos.pets.getById(other.id))?.coverPhotoPath).not.toBeNull();
+  });
+});
+
+describe('pet photos', () => {
+  const clip: PickedPhoto = { uri: 'content://picker/2', mimeType: 'video/mp4', width: 640, height: 360, durationSeconds: 4 };
+
+  it('saves photos and clips on the pet without a memory, oldest first', async () => {
+    const { repos, pet } = await setup();
+
+    await addPetPhotos(repos, pet, [photo, clip], now);
+
+    const photos = await listPetPhotos(repos, pet);
+    expect(photos).toHaveLength(2);
+    expect(photos.map((p) => [p.memoryId, p.petId, p.mimeType, p.durationSeconds])).toEqual([
+      [null, pet.id, 'image/jpeg', null],
+      [null, pet.id, 'video/mp4', 4],
+    ]);
+  });
+
+  it('leaves out the cover and photos that belong to a memory', async () => {
+    const { db, repos, pet } = await setup();
+    const withCover = await setCoverPhoto(repos, pet, photo, now);
+    await db.runAsync(
+      `INSERT INTO memories (id, petId, occurredAt, createdAt, updatedAt) VALUES ('m1', ?, ?, ?, ?)`,
+      [pet.id, now.toISOString(), now.toISOString(), now.toISOString()],
+    );
+    await db.runAsync(
+      `INSERT INTO media (id, memoryId, petId, localUri, createdAt) VALUES ('in-memory', 'm1', ?, 'media/in-memory.jpg', ?)`,
+      [pet.id, now.toISOString()],
+    );
+    await addPetPhotos(repos, withCover, [photo], now);
+
+    const photos = await listPetPhotos(repos, withCover);
+    expect(photos).toHaveLength(1);
+    expect(photos[0].id).not.toBe(withCover.coverPhotoId);
+    expect(photos[0].memoryId).toBeNull();
+  });
+
+  it('removes copied files if one photo fails to save', async () => {
+    const { repos, pet } = await setup();
+    jest.mocked(importMediaFile)
+      .mockImplementationOnce(async (_uri, id) => `media/${id}.jpg`)
+      .mockRejectedValueOnce(new Error('disk full'));
+
+    await expect(addPetPhotos(repos, pet, [photo, photo], now)).rejects.toThrow('disk full');
+
+    expect(await listPetPhotos(repos, pet)).toEqual([]);
+    expect(deleteMediaFile).toHaveBeenCalledTimes(1);
+  });
+
+  it('deletes one photo row and its file', async () => {
+    const { repos, pet } = await setup();
+    await addPetPhotos(repos, pet, [photo, photo], now);
+    const [first, second] = await listPetPhotos(repos, pet);
+
+    await deletePetPhoto(repos, first);
+
+    expect(await listPetPhotos(repos, pet)).toEqual([second]);
+    expect(deleteMediaFile).toHaveBeenCalledWith(first.localUri);
   });
 });
