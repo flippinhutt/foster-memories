@@ -90,7 +90,7 @@ Use segmented controls or tabs:
 
 1. Tap the central “Add Memory” button.
 2. Select a pet, or create a new pet if none exists.
-3. Choose photos from the camera roll.
+3. Choose photos or videos from the gallery, or take a photo with the camera.
 4. Add a title and short note.
 5. Optionally add date, location, mood, and tags.
 6. Save.

@@ -4,7 +4,8 @@ import type { MediaRepository } from '@/src/db/repositories/mediaRepository';
 import type { MemoryRepository } from '@/src/db/repositories/memoryRepository';
 import type { Media } from '@/src/types/media';
 import { MEMORY_MOODS, type Memory } from '@/src/types/memory';
-import { displayToIsoDate, formatDate, parseDisplayDate } from '@/src/utils/dates';
+import type { Pet } from '@/src/types/pet';
+import { displayToIsoDate, formatDate, parseDisplayDate, toDisplayDate } from '@/src/utils/dates';
 import { deleteMediaFile, importMediaFile } from './mediaFiles';
 import type { PickedPhoto } from './photoPicker';
 
@@ -118,7 +119,7 @@ async function addPhotos(repos: MemoryRepos, memory: Memory, photos: PickedPhoto
         mimeType: photo.mimeType,
         width: photo.width,
         height: photo.height,
-        durationSeconds: null,
+        durationSeconds: photo.durationSeconds ?? null,
         caption: null,
         takenAt: null,
         createdAt: timestamp,
@@ -198,4 +199,18 @@ export async function deleteMemory(repos: MemoryRepos, memoryId: string): Promis
     await repos.media.delete(media.id);
     deleteMediaFile(media.localUri);
   }
+}
+
+export const FAREWELL_TAG = 'farewell';
+
+/** A guided farewell memory, dated the day they left (or today). */
+export function farewellMemoryForm(pet: Pet, now: Date = new Date()): MemoryFormValues {
+  return {
+    ...emptyMemoryForm,
+    petId: pet.id,
+    occurredAt: pet.departureDate ? formatDate(pet.departureDate) : toDisplayDate(now),
+    title: `Goodbye, ${pet.name}`,
+    body: 'A favorite moment together:\n\nWhat you’ll miss most:\n\nWhat they taught you:\n',
+    tags: FAREWELL_TAG,
+  };
 }

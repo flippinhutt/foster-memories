@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { Image, StyleSheet, View, type ImageStyle, type StyleProp } from 'react-native';
 import { radius, useTheme } from '@/src/theme';
@@ -8,12 +9,26 @@ interface Props {
   uri: string;
   label: string;
   style: StyleProp<ImageStyle>;
+  /** Shows a play tile instead: video files have no still frame to load. */
+  video?: boolean;
 }
 
 /** A photo that shows a quiet placeholder when the file is missing or unreadable. */
-export function MediaImage({ uri, label, style }: Props) {
+export function MediaImage({ uri, label, style, video }: Props) {
   const colors = useTheme();
   const [failedUri, setFailedUri] = useState<string | null>(null);
+
+  if (video) {
+    return (
+      <View
+        style={[styles.box, { backgroundColor: colors.surfaceMuted }, style]}
+        accessible
+        accessibilityLabel={label ? `${label} (video)` : undefined}
+      >
+        <Ionicons name="play-circle" size={32} color={colors.textMuted} />
+      </View>
+    );
+  }
 
   if (uri === failedUri) {
     return (

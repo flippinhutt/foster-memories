@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { getRepositories } from '@/src/db';
-import { prepareMediaUris } from '@/src/services/mediaFiles';
+import { deleteMediaFile, listMediaFiles, prepareMediaUris } from '@/src/services/mediaFiles';
+import { sweepOrphanMedia } from '@/src/services/mediaSweep';
 import { useCollectionStore } from '@/src/stores/collectionStore';
 import { useMemoryStore } from '@/src/stores/memoryStore';
 import { useMilestoneStore } from '@/src/stores/milestoneStore';
@@ -17,7 +18,9 @@ export function DatabaseGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     Promise.all([getRepositories(), prepareMediaUris()])
-      .then(() => {
+      .then(async ([repos]) => {
+        // Best effort; leftover files must never keep the app from opening.
+        await sweepOrphanMedia(repos.media, { list: listMediaFiles, remove: deleteMediaFile }).catch(() => undefined);
         setState({ status: 'ready' });
         return Promise.all([
           usePetStore.getState().load(),

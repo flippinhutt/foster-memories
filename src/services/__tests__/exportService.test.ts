@@ -58,6 +58,15 @@ describe('exportService', () => {
     expect(storyToMarkdown(story, { photoLinks: false })).not.toContain('](media/');
   });
 
+  it('links videos instead of embedding them', () => {
+    const withVideo: PetStory = {
+      ...story,
+      memories: [{ ...story.memories[0], photos: [mediaFixture({ localUri: 'media/clip.mp4', mimeType: 'video/mp4' })] }],
+    };
+    expect(storyToMarkdown(withVideo, { photoLinks: true })).toContain('[Video 1](media/clip.mp4)');
+    expect(storyToMarkdown(withVideo, { photoLinks: true })).not.toContain('![');
+  });
+
   it('escapes HTML and skips missing photos', () => {
     const html = storyToHtml(story, { 'media/media-1.jpg': 'data:image/jpeg;base64,AAA' });
     expect(html).toContain('Found &lt;outside&gt;.');

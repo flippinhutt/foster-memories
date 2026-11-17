@@ -6,10 +6,11 @@ import { Platform, Pressable, ScrollView, StyleSheet, Switch, View } from 'react
 import { mediaUri } from '@/src/services/mediaFiles';
 import { memoryFormSchema, type DraftPhoto, type MemoryFormValues } from '@/src/services/memoryService';
 import { usePhotoDrop } from '@/src/services/photoDrop';
-import { pickPhotos, type PickedPhoto } from '@/src/services/photoPicker';
+import { pickPhotos, takePhoto, type PickedPhoto } from '@/src/services/photoPicker';
 import { SAVE_SHORTCUT_HINT, useSaveShortcut } from '@/src/services/saveShortcut';
 import { MEMORY_MOODS } from '@/src/types/memory';
 import type { Pet } from '@/src/types/pet';
+import { isVideo } from '@/src/utils/media';
 import { MOOD_LABELS } from '@/src/utils/memoryLabels';
 import { radius, spacing, touchTarget, useIsWide, useTheme } from '@/src/theme';
 import { AppText } from './AppText';
@@ -57,6 +58,8 @@ function FormTextField({ control, name, label, placeholder, hint, multiline }: F
 }
 
 const photoUri = (draft: DraftPhoto) => (draft.kind === 'saved' ? mediaUri(draft.media.localUri) : draft.photo.uri);
+const draftIsVideo = (draft: DraftPhoto) =>
+  draft.kind === 'saved' ? isVideo(draft.media.localUri, draft.media.mimeType) : isVideo(draft.photo.uri, draft.photo.mimeType);
 const photoKey = (draft: DraftPhoto) => (draft.kind === 'saved' ? draft.media.id : draft.photo.uri);
 
 function PhotoField({ value, onChange }: { value: DraftPhoto[]; onChange: (photos: DraftPhoto[]) => void }) {
@@ -83,6 +86,17 @@ function PhotoField({ value, onChange }: { value: DraftPhoto[]; onChange: (photo
     }
   };
 
+  const capture = async () => {
+    setError(null);
+    try {
+      const photo = await takePhoto();
+      if (photo === 'denied') setError('Camera access is off. Allow it in Settings to take photos here.');
+      else if (photo) append([photo]);
+    } catch {
+      setError('Could not open the camera. Please try again.');
+    }
+  };
+
   const toggle = (key: string) => {
     const next = new Set(selected);
     if (!next.delete(key)) next.add(key);
@@ -101,12 +115,12 @@ function PhotoField({ value, onChange }: { value: DraftPhoto[]; onChange: (photo
       ref={zone}
       style={[styles.field, dragging && [styles.dropping, { borderColor: colors.primary, backgroundColor: colors.surfaceMuted }]]}
     >
-      <AppText variant="label">Photos</AppText>
+      <AppText variant="label">Photos and videos</AppText>
       {value.length > 0 ? (
         <ScrollView horizontal={!wide} contentContainerStyle={[styles.photos, wide && styles.wrap]}>
           {value.map((draft, index) => {
             const key = photoKey(draft);
-            const image = <MediaImage uri={photoUri(draft)} label={`Photo ${index + 1}`} style={thumb} />;
+            const image = <MediaImage uri={photoUri(draft)} label={`Photo ${index + 1}`} style={thumb} video={draftIsVideo(draft)} />;
             if (selected) {
               const checked = selected.has(key);
               return (
@@ -171,6 +185,11 @@ function PhotoField({ value, onChange }: { value: DraftPhoto[]; onChange: (photo
           <View style={styles.grow}>
             <Button label="Add photos" variant="secondary" onPress={add} />
           </View>
+          {Platform.OS !== 'web' ? (
+            <View style={styles.grow}>
+              <Button label="Take photo" variant="secondary" onPress={capture} />
+            </View>
+          ) : null}
           {value.length > 1 ? (
             <View style={styles.grow}>
               <Button label="Select photos" variant="secondary" onPress={() => setSelected(new Set())} />

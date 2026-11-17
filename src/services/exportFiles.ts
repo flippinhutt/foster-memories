@@ -14,6 +14,7 @@ import {
 } from './exportService';
 import { assertCanSave, saveFile, savePdf } from './deviceFiles';
 import { readMediaBytes } from './mediaFiles';
+import { isVideo } from '@/src/utils/media';
 
 /** Builds the export, then shares it (Android) or downloads it (web). */
 export async function exportPetStory(
@@ -34,7 +35,8 @@ export async function exportPetStory(
   const name = exportFileName(story.pet, ext, now);
   const title = `Share ${story.pet.name} (${label})`;
 
-  const paths = format === 'pdf' || format === 'zip' ? storyPhotoPaths(story) : [];
+  // A PDF can't play video, so clips only go in the ZIP.
+  const paths = format === 'zip' ? storyPhotoPaths(story) : format === 'pdf' ? storyPhotoPaths(story).filter((p) => !isVideo(p)) : [];
   const photos: Record<string, Uint8Array> = {};
   for (const [i, path] of paths.entries()) {
     onProgress(`Adding photos ${i + 1} of ${paths.length}…`);

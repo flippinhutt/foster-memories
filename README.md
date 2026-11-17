@@ -11,19 +11,23 @@ No account. No cloud. No ads or tracking. Your data stays on your device.
 ## Features
 
 - **Pet profiles** with cover photo, arrival and departure dates, and status
-- **Memories** with photos, a note, mood, tags, location, and favorites
+- **Memories** with photos (gallery or camera), short video clips, a note, mood, tags, location, and favorites
+- **On this day** on Home: memories and farewells from this date in past years
+- **Farewell prompts** once a pet leaves your care
 - **Story timeline** that mixes memories and milestones, grouped by month
 - **Milestones** like first purr, first walk, or adoption day, optionally linked to a memory
 - **Collections** such as "First Week" or "Funny Moments", across pets
 - **Search** pets, memories, milestones, and tags, with tag and favorites filters
-- **Export** a pet's story as a scrapbook-style PDF, Markdown, JSON, or a ZIP with photos
+- **Export** a pet's story as a scrapbook-style PDF (photos only), Markdown, JSON, or a ZIP with photos and videos
 - **Backup and restore** everything in one ZIP file
 
 ## Privacy
 
 - All data is stored locally in SQLite (Android/iOS) or browser storage (web).
 - Imported photos are copied into the app's private storage. Originals in your gallery are never changed or deleted.
-- Photos are picked with the system photo picker; no camera, microphone, or broad storage permission.
+- Photos and videos are picked with the system photo picker; no broad storage permission.
+- Camera permission is asked only when you tap Take photo. No microphone permission.
+- On launch, app-private media files no longer linked to any memory are deleted. Gallery originals are never touched.
 - No analytics, crash reporting, remote config, or network calls.
 - Export and backup files are only shared where you choose to send them.
 

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { mediaUri } from '@/src/services/mediaFiles';
 import type { MemorySummary } from '@/src/types/memory';
 import { formatDate } from '@/src/utils/dates';
+import { isVideo } from '@/src/utils/media';
 import { MOOD_LABELS } from '@/src/utils/memoryLabels';
 import { radius, spacing, touchTarget, useTheme } from '@/src/theme';
 import { AppText } from './AppText';
@@ -20,7 +21,7 @@ export function MemoryCard({ memory, onPress }: Props) {
   const meta = [
     formatDate(memory.occurredAt),
     memory.mood ? MOOD_LABELS[memory.mood] : null,
-    memory.photoCount > 1 ? `${memory.photoCount} photos` : null,
+    memory.photoCount > 1 ? `${memory.photoCount} items` : null,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -38,7 +39,7 @@ export function MemoryCard({ memory, onPress }: Props) {
       ]}
     >
       {memory.photoPath ? (
-        <MediaImage uri={mediaUri(memory.photoPath)} label="" style={styles.photo} />
+        <MediaImage uri={mediaUri(memory.photoPath)} label="" style={styles.photo} video={isVideo(memory.photoPath)} />
       ) : null}
       <View style={styles.body}>
         <View style={styles.headline}>

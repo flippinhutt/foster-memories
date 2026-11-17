@@ -40,7 +40,7 @@
         "expo-image-picker",
         {
           "photosPermission": "Choose photos of your foster pets to save in Foster Memories.",
-          "cameraPermission": false,
+          "cameraPermission": "Take photos of your foster pets to save in Foster Memories.",
           "microphonePermission": false
         }
       ],
@@ -56,7 +56,8 @@
             "backgroundColor": "#1C1815"
           }
         }
-      ]
+      ],
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true

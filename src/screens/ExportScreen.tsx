@@ -13,6 +13,7 @@ import { exportPetStory } from '@/src/services/exportFiles';
 import { EXPORT_FORMATS, loadPetStory, storyPhotoPaths, type ExportFormat } from '@/src/services/exportService';
 import { mediaUri } from '@/src/services/mediaFiles';
 import { selectPetById, usePetStore } from '@/src/stores/petStore';
+import { isVideo } from '@/src/utils/media';
 import { radius, spacing, useIsWide, useTheme } from '@/src/theme';
 
 export function ExportScreen() {
@@ -48,6 +49,10 @@ export function ExportScreen() {
 
   if (!pet) return <EmptyState title="Pet not found" message="It may have been deleted." />;
 
+  // A PDF can't hold video, so only photos are offered there.
+  const shown = format === 'pdf' ? photos.filter((path) => !isVideo(path)) : photos;
+  const keptCount = shown.filter((path) => !skipped.has(path)).length;
+
   const run = async () => {
     setError(null);
     setProgress('Starting…');
@@ -65,16 +70,16 @@ export function ExportScreen() {
       <AppText variant="title">Export {pet.name}’s story</AppText>
       <AppText muted>Files are made on this device and shared only where you choose.</AppText>
       <OptionPicker label="Format" options={EXPORT_FORMATS} value={format} onChange={setFormat} />
-      {(format === 'pdf' || format === 'zip') && photos.length > 0 ? (
+      {(format === 'pdf' || format === 'zip') && shown.length > 0 ? (
         <View style={styles.photos}>
           <AppText variant="label">
-            Photos ({photos.length - skipped.size} of {photos.length})
+            Photos ({keptCount} of {shown.length})
           </AppText>
           <AppText variant="caption" muted>
             Tap a photo to leave it out.
           </AppText>
           <View style={styles.grid}>
-            {photos.map((path, i) => {
+            {shown.map((path, i) => {
               const included = !skipped.has(path);
               return (
                 <Pressable
@@ -90,7 +95,12 @@ export function ExportScreen() {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <MediaImage uri={mediaUri(path)} label={`Photo ${i + 1}`} style={[styles.thumb, !included && styles.off]} />
+                  <MediaImage
+                    uri={mediaUri(path)}
+                    label={`Photo ${i + 1}`}
+                    style={[styles.thumb, !included && styles.off]}
+                    video={isVideo(path)}
+                  />
                   <View style={[styles.check, { backgroundColor: included ? colors.primary : colors.surfaceMuted }]}>
                     {included ? <Ionicons name="checkmark" size={16} color={colors.onPrimary} /> : null}
                   </View>

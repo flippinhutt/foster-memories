@@ -1,6 +1,6 @@
-import { milestoneFixture, memoryFixture } from '@/test/fixtures';
+import { milestoneFixture, memoryFixture, petFixture } from '@/test/fixtures';
 import type { MemorySummary } from '@/src/types/memory';
-import { buildTimeline } from '../timeline';
+import { buildTimeline, onThisDay } from '../timeline';
 
 const memory = (id: string, occurredAt: string): MemorySummary => ({
   ...memoryFixture({ id, occurredAt }),
@@ -30,5 +30,39 @@ describe('buildTimeline', () => {
 
   it('returns no groups when empty', () => {
     expect(buildTimeline([], [])).toEqual([]);
+  });
+});
+
+describe('onThisDay', () => {
+  const today = new Date(2026, 10, 16);
+
+  it('finds memories from this date in earlier years, newest first', () => {
+    const result = onThisDay(
+      [
+        memory('this-year', '2026-11-16'),
+        memory('two-years', '2024-11-16'),
+        memory('other-day', '2025-11-15'),
+        memory('last-year', '2025-11-16'),
+      ],
+      [],
+      today,
+    );
+    expect(result.memories.map((m) => [m.item.id, m.yearsAgo])).toEqual([
+      ['last-year', 1],
+      ['two-years', 2],
+    ]);
+  });
+
+  it('finds pets who left on this date in earlier years', () => {
+    const result = onThisDay(
+      [],
+      [
+        petFixture({ id: 'left', departureDate: '2025-11-16' }),
+        petFixture({ id: 'today', departureDate: '2026-11-16' }),
+        petFixture({ id: 'here', departureDate: null }),
+      ],
+      today,
+    );
+    expect(result.departures.map((d) => [d.pet.id, d.yearsAgo])).toEqual([['left', 1]]);
   });
 });

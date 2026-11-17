@@ -7,6 +7,7 @@ import { Button } from '@/src/components/Button';
 import { Card } from '@/src/components/Card';
 import { DetailRow } from '@/src/components/DetailRow';
 import { MediaImage } from '@/src/components/MediaImage';
+import { MediaVideo } from '@/src/components/MediaVideo';
 import { Screen } from '@/src/components/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/StateViews';
 import { mediaUri } from '@/src/services/mediaFiles';
@@ -16,6 +17,7 @@ import { useMilestoneStore } from '@/src/stores/milestoneStore';
 import { selectPetById, usePetStore } from '@/src/stores/petStore';
 import { confirmDestructive } from '@/src/utils/confirm';
 import { formatDate } from '@/src/utils/dates';
+import { isVideo } from '@/src/utils/media';
 import { MOOD_LABELS } from '@/src/utils/memoryLabels';
 import { spacing, useIsWide, useTheme } from '@/src/theme';
 
@@ -91,17 +93,17 @@ export function MemoryDetailScreen() {
     <Screen>
       <Stack.Screen options={{ title: formatDate(memory.occurredAt) }} />
       <View style={wide ? styles.grid : styles.photos}>
-        {photos.map((photo, index) => (
-          <MediaImage
-            key={photo.id}
-            uri={mediaUri(photo.localUri)}
-            label={`Photo ${index + 1} of ${photos.length}`}
-            style={[
-              wide && photos.length > 1 ? styles.half : styles.photo,
-              { aspectRatio: photo.width && photo.height ? photo.width / photo.height : 1 },
-            ]}
-          />
-        ))}
+        {photos.map((photo, index) => {
+          const style = [
+            wide && photos.length > 1 ? styles.half : styles.photo,
+            { aspectRatio: photo.width && photo.height ? photo.width / photo.height : 1 },
+          ];
+          return isVideo(photo.localUri, photo.mimeType) ? (
+            <MediaVideo key={photo.id} uri={mediaUri(photo.localUri)} label={`Video ${index + 1} of ${photos.length}`} style={style} />
+          ) : (
+            <MediaImage key={photo.id} uri={mediaUri(photo.localUri)} label={`Photo ${index + 1} of ${photos.length}`} style={style} />
+          );
+        })}
       </View>
       <View style={styles.header}>
         <View style={styles.headline}>

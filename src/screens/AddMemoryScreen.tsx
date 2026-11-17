@@ -3,14 +3,14 @@ import { useState } from 'react';
 import { MemoryForm } from '@/src/components/MemoryForm';
 import { Screen } from '@/src/components/Screen';
 import { EmptyState } from '@/src/components/StateViews';
-import { emptyMemoryForm } from '@/src/services/memoryService';
+import { emptyMemoryForm, farewellMemoryForm } from '@/src/services/memoryService';
 import { useMemoryStore } from '@/src/stores/memoryStore';
 import { usePetStore } from '@/src/stores/petStore';
 import { toDisplayDate } from '@/src/utils/dates';
 
 export function AddMemoryScreen() {
   const router = useRouter();
-  const { petId } = useLocalSearchParams<{ petId?: string }>();
+  const { petId, farewell } = useLocalSearchParams<{ petId?: string; farewell?: string }>();
   const pets = usePetStore((state) => state.pets);
   const create = useMemoryStore((state) => state.create);
   // Bumped after each save so the tab shows a fresh form next time.
@@ -35,9 +35,13 @@ export function AddMemoryScreen() {
   return (
     <Screen>
       <MemoryForm
-        key={`${defaultPet.id}-${saved}`}
+        key={`${defaultPet.id}-${farewell ?? ''}-${saved}`}
         pets={pets}
-        initialValues={{ ...emptyMemoryForm, petId: defaultPet.id, occurredAt: toDisplayDate(new Date()) }}
+        initialValues={
+          farewell && defaultPet.id === petId && saved === 0
+            ? farewellMemoryForm(defaultPet)
+            : { ...emptyMemoryForm, petId: defaultPet.id, occurredAt: toDisplayDate(new Date()) }
+        }
         submitLabel="Save memory"
         onSubmit={async (values) => {
           const memory = await create(values);

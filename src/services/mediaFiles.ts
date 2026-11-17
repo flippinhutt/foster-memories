@@ -7,7 +7,15 @@ const EXTENSIONS: Record<string, string> = {
   'image/png': 'png',
   'image/webp': 'webp',
   'image/heic': 'heic',
+  'video/mp4': 'mp4',
+  'video/quicktime': 'mov',
+  'video/webm': 'webm',
+  'video/3gpp': '3gp',
 };
+
+/** Unknown video types still get a video extension, so the app knows to play them. */
+const extension = (mimeType: string | null) =>
+  (mimeType && EXTENSIONS[mimeType]) ?? (mimeType?.startsWith('video/') ? 'mp4' : 'jpg');
 
 /**
  * Copies a picked file into app-private storage and returns its path relative to the
@@ -16,7 +24,7 @@ const EXTENSIONS: Record<string, string> = {
 export async function importMediaFile(sourceUri: string, id: string, mimeType: string | null): Promise<string> {
   const dir = new Directory(Paths.document, MEDIA_DIR);
   dir.create({ intermediates: true, idempotent: true });
-  const name = `${id}.${(mimeType && EXTENSIONS[mimeType]) ?? 'jpg'}`;
+  const name = `${id}.${extension(mimeType)}`;
   await new File(sourceUri).copy(new File(dir, name));
   return `${MEDIA_DIR}/${name}`;
 }
@@ -34,6 +42,13 @@ export function deleteMediaFile(path: string): void {
   } catch {
     // Ignore; an orphaned file is harmless and private to the app.
   }
+}
+
+/** Every file in app media storage, as `media/...` paths. */
+export async function listMediaFiles(): Promise<string[]> {
+  const dir = new Directory(Paths.document, MEDIA_DIR);
+  if (!dir.exists) return [];
+  return dir.list().flatMap((entry) => (entry instanceof File ? [`${MEDIA_DIR}/${entry.name}`] : []));
 }
 
 /** Native URIs are file paths, so there is nothing to load. Web loads its photo URLs here. */

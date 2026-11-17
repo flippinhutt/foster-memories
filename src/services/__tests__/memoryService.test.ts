@@ -10,6 +10,7 @@ import {
   createMemory,
   deleteMemory,
   emptyMemoryForm,
+  farewellMemoryForm,
   memoryFormSchema,
   parseTags,
   toggleFavorite,
@@ -117,6 +118,18 @@ describe('createMemory', () => {
     expect(importMediaFile).toHaveBeenNthCalledWith(2, 'content://picker/2', photos[1].id, 'image/jpeg');
   });
 
+  it('keeps a video clip with its length', async () => {
+    const { repos } = await setup();
+    const clip: PickedPhoto = { uri: 'content://picker/clip', mimeType: 'video/mp4', width: 1920, height: 1080, durationSeconds: 12.5 };
+
+    const memory = await createMemory(repos, form({ photos: [{ kind: 'new', photo: clip }] }), now);
+
+    expect(importMediaFile).toHaveBeenCalledWith('content://picker/clip', expect.any(String), 'video/mp4');
+    expect(await repos.media.listByMemory(memory.id)).toEqual([
+      expect.objectContaining({ mimeType: 'video/mp4', durationSeconds: 12.5 }),
+    ]);
+  });
+
   it('removes the memory and copied files if a photo fails to copy', async () => {
     const { repos } = await setup();
     jest.mocked(importMediaFile)
@@ -189,5 +202,17 @@ describe('toggleFavorite and deleteMemory', () => {
     expect(deleteMediaFile).toHaveBeenCalledTimes(1);
     expect(deleteMediaFile).toHaveBeenCalledWith(gonePhoto.localUri);
     expect(await repos.media.listByMemory(keep.id)).toHaveLength(1);
+  });
+});
+
+describe('farewellMemoryForm', () => {
+  it('starts a farewell on the departure day with prompts and a tag', () => {
+    const values = farewellMemoryForm(petFixture({ name: 'Biscuit', departureDate: '2026-05-02' }), now);
+    expect(values).toMatchObject({ petId: 'pet-1', occurredAt: '05-02-2026', title: 'Goodbye, Biscuit', tags: 'farewell' });
+    expect(values.body).toContain('What you’ll miss most:');
+  });
+
+  it('uses today without a departure date', () => {
+    expect(farewellMemoryForm(petFixture({ departureDate: null }), new Date(2026, 3, 1)).occurredAt).toBe('04-01-2026');
   });
 });

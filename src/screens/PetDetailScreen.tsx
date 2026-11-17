@@ -13,6 +13,7 @@ import { PetAvatar } from '@/src/components/PetAvatar';
 import { Screen } from '@/src/components/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/src/components/StateViews';
 import { StatusBadge } from '@/src/components/StatusBadge';
+import { FAREWELL_TAG } from '@/src/services/memoryService';
 import { pickPhoto } from '@/src/services/photoPicker';
 import { useMemoryStore } from '@/src/stores/memoryStore';
 import { useMilestoneStore } from '@/src/stores/milestoneStore';
@@ -46,6 +47,9 @@ export function PetDetailScreen() {
   const memories = memoryStore.memories.filter((memory) => memory.petId === pet.id);
   const milestones = milestoneStore.milestones.filter((milestone) => milestone.petId === pet.id);
   const timeline = buildTimeline(memories, milestones);
+  const hasFarewell = memories.some((memory) =>
+    memoryStore.tagsByMemory[memory.id]?.some((tag) => tag.toLowerCase() === FAREWELL_TAG),
+  );
   const memoryTitle = (memoryId: string | null) => {
     const memory = memories.find((m) => m.id === memoryId);
     return memory ? (memory.title ?? memory.body ?? 'Photo memory') : undefined;
@@ -154,6 +158,17 @@ export function PetDetailScreen() {
           <AppText accessibilityRole="alert" style={{ color: colors.danger }}>
             {actionError}
           </AppText>
+        ) : null}
+        {pet.status !== 'active' && !hasFarewell && memoryStore.status === 'ready' ? (
+          <Card>
+            <AppText variant="heading">Say goodbye</AppText>
+            <AppText muted>Write a few words about your time with {pet.name}. A few prompts are there to help.</AppText>
+            <Button
+              label="Write a farewell"
+              variant="secondary"
+              onPress={() => router.push({ pathname: '/add-memory', params: { petId: pet.id, farewell: '1' } })}
+            />
+          </Card>
         ) : null}
         <Card>
           <AppText variant="heading">Story</AppText>

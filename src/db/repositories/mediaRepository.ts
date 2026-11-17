@@ -6,6 +6,8 @@ export interface MediaRepository {
   insert(media: Media): Promise<void>;
   delete(id: string): Promise<void>;
   listPathsByPet(petId: string): Promise<string[]>;
+  /** Every stored file path, photos and thumbnails. */
+  listAllPaths(): Promise<string[]>;
   /** A memory's photos in the order they were added. */
   listByMemory(memoryId: string): Promise<Media[]>;
 }
@@ -48,6 +50,14 @@ export function createSqliteMediaRepository(db: SqlDatabase): MediaRepository {
       return rows.flatMap((row) => (row.thumbnailUri ? [row.localUri, row.thumbnailUri] : [row.localUri]));
     },
 
+    async listAllPaths() {
+      const rows = await db.getAllAsync<{ path: string }>(
+        'SELECT localUri AS path FROM media UNION SELECT thumbnailUri FROM media WHERE thumbnailUri IS NOT NULL',
+        [],
+      );
+      return rows.map((row) => row.path);
+    },
+
     listByMemory: (memoryId) =>
       db.getAllAsync<Media>('SELECT * FROM media WHERE memoryId = ? ORDER BY rowid', [memoryId]),
   };
@@ -66,6 +76,8 @@ export function createMemoryMediaRepository(): MediaRepository {
     },
     listPathsByPet: async (petId) =>
       [...media.values()].filter((item) => item.petId === petId).map((item) => item.localUri),
+    listAllPaths: async () =>
+      [...media.values()].flatMap((item) => (item.thumbnailUri ? [item.localUri, item.thumbnailUri] : [item.localUri])),
     listByMemory: async (memoryId) => [...media.values()].filter((item) => item.memoryId === memoryId),
   };
 }

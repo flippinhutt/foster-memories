@@ -5,6 +5,7 @@ import type { Memory } from '@/src/types/memory';
 import type { Milestone } from '@/src/types/milestone';
 import type { Pet } from '@/src/types/pet';
 import { formatDate } from '@/src/utils/dates';
+import { isVideo } from '@/src/utils/media';
 import { MOOD_LABELS } from '@/src/utils/memoryLabels';
 import { STATUS_LABELS, petSummary } from '@/src/utils/petLabels';
 
@@ -134,7 +135,9 @@ export function storyToMarkdown(story: PetStory, { photoLinks }: { photoLinks: b
     const meta = memoryMeta(entry);
     if (meta.length > 0) out.push(...meta.map((line) => `- ${line}`), '');
     if (photoLinks) {
-      entry.photos.forEach((photo, i) => out.push(`![Photo ${i + 1}](${photo.localUri})`));
+      entry.photos.forEach((photo, i) =>
+        out.push(isVideo(photo.localUri) ? `[Video ${i + 1}](${photo.localUri})` : `![Photo ${i + 1}](${photo.localUri})`),
+      );
       if (entry.photos.length > 0) out.push('');
     }
   }

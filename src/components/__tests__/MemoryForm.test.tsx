@@ -1,9 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { emptyMemoryForm, type MemoryFormValues } from '@/src/services/memoryService';
-import { pickPhotos } from '@/src/services/photoPicker';
+import { pickPhotos, takePhoto } from '@/src/services/photoPicker';
 import { MemoryForm } from '../MemoryForm';
 
-jest.mock('@/src/services/photoPicker', () => ({ pickPhotos: jest.fn() }));
+jest.mock('@/src/services/photoPicker', () => ({ pickPhotos: jest.fn(), takePhoto: jest.fn() }));
 jest.mock('@/src/services/mediaFiles', () => ({ mediaUri: (path: string) => path }));
 
 const pets = [
@@ -43,6 +43,31 @@ describe('MemoryForm', () => {
         expect.objectContaining({ petId: 'pet-2', body: 'Slept in the sun', mood: 'sweet', tags: 'naps, sun', isFavorite: true }),
       ),
     );
+  });
+
+  it('adds a photo from the camera', async () => {
+    jest.mocked(takePhoto).mockResolvedValueOnce({ uri: 'file://camera.jpg', mimeType: 'image/jpeg', width: 10, height: 10 });
+    const onSubmit = jest.fn(async () => undefined);
+    await renderForm(onSubmit);
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Take photo' }));
+    expect(await screen.findByLabelText('Photo 1')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Save memory' }));
+
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ photos: [expect.objectContaining({ kind: 'new', photo: expect.objectContaining({ uri: 'file://camera.jpg' }) })] }),
+      ),
+    );
+  });
+
+  it('explains when camera access is off', async () => {
+    jest.mocked(takePhoto).mockResolvedValueOnce('denied');
+    await renderForm();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Take photo' }));
+
+    expect(await screen.findByText('Camera access is off. Allow it in Settings to take photos here.')).toBeTruthy();
   });
 
   it('removes several selected photos at once', async () => {

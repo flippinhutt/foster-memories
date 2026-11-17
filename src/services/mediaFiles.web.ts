@@ -6,7 +6,15 @@ const EXTENSIONS: Record<string, string> = {
   'image/png': 'png',
   'image/webp': 'webp',
   'image/heic': 'heic',
+  'video/mp4': 'mp4',
+  'video/quicktime': 'mov',
+  'video/webm': 'webm',
+  'video/3gpp': '3gp',
 };
+
+/** Unknown video types still get a video extension, so the app knows to play them. */
+const extension = (mimeType: string | null) =>
+  (mimeType && EXTENSIONS[mimeType]) ?? (mimeType?.startsWith('video/') ? 'mp4' : 'jpg');
 
 /** Object URLs for stored photos, so mediaUri can stay synchronous like on native. */
 const urls = new Map<string, string>();
@@ -58,7 +66,7 @@ export function prepareMediaUris(): Promise<void> {
 
 /** Copies a picked photo into browser storage and returns its `media/...` path. */
 export async function importMediaFile(sourceUri: string, id: string, mimeType: string | null): Promise<string> {
-  const path = `${MEDIA_DIR}/${id}.${(mimeType && EXTENSIONS[mimeType]) ?? 'jpg'}`;
+  const path = `${MEDIA_DIR}/${id}.${extension(mimeType)}`;
   await save(path, await (await fetch(sourceUri)).blob());
   return path;
 }
@@ -75,6 +83,14 @@ export function deleteMediaFile(path: string): void {
   mediaDir()
     .then((dir) => dir.removeEntry(fileName(path)))
     .catch(() => undefined);
+}
+
+export async function listMediaFiles(): Promise<string[]> {
+  const paths: string[] = [];
+  for await (const [name, handle] of await mediaDir()) {
+    if (handle.kind === 'file') paths.push(`${MEDIA_DIR}/${name}`);
+  }
+  return paths;
 }
 
 export async function readMediaBytes(path: string): Promise<Uint8Array | null> {
